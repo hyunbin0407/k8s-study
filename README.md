@@ -1,0 +1,15 @@
+# k8s-study
+
+쿠버네티스 학습 기록 저장소입니다. Docker Desktop 내장 Kubernetes 클러스터로 실습하며 배운 내용을 정리합니다.
+
+## 진행 기록
+
+| 날짜 | 주제 | 링크 |
+| --- | --- | --- |
+| 2026-08-23 | Docker Desktop 설치 & Kubernetes 활성화 | [notes/2026-08-23.md](notes/2026-08-23.md) |
+
+## 환경
+
+- Docker Desktop (macOS, Apple Silicon)
+- Kubernetes: Docker Desktop 내장 단일 노드 클러스터
+- 도구: `kubectl`
