@@ -122,3 +122,55 @@ Docker Desktop에서 켠 Kubernetes = 로컬 PC 한 대를 "1노드짜리 미니
 3. **로컬 학습용**: Docker Desktop / minikube / kind — 내 PC에서 미니 클러스터 (현재 사용 중)
 
 → 클러스터 구축은 인프라 영역, 지금은 쿠버네티스 "사용법"(Pod/Deployment/Service) 학습에 집중하는 게 우선.
+
+## Deployment란?
+
+Pod를 원하는 개수만큼 자동으로 만들고 그 상태를 계속 유지해주는 상위 오브젝트. 실무에서 앱 배포 시 가장 많이 쓰는 단위.
+
+### 필요한 이유
+Pod는 불변(수정 불가) + 언제든 죽을 수 있음(자동 재생성 안 됨) → Deployment가 "원하는 상태(desired state)"를 선언하면 계속 유지해줌.
+
+### 계층 구조
+```
+Deployment (원하는 상태 선언 + 배포 전략)
+  ↓ 자동 생성
+ReplicaSet (실제 개수 감시, 부족하면 채움)
+  ↓ 자동 생성
+Pod, Pod, Pod (실행 단위)
+```
+실무에서 ReplicaSet을 직접 다룰 일은 거의 없음 — Deployment가 알아서 관리.
+
+### 핵심 기능
+- **Self-healing**: Pod 죽으면 자동으로 새 Pod 생성
+- **스케일링**: `kubectl scale`로 개수 조정
+- **롤링 업데이트**: 이미지 버전 변경 시 Pod를 하나씩 순차 교체 (무중단)
+- **롤백**: 문제 생기면 이전 버전으로 복귀 가능
+
+### YAML 예시
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+```
+`replicas: 3`이 "원하는 상태" 선언. `kubectl apply`로 적용하면 쿠버네티스가 계속 그 상태를 지킴 → **선언적(Declarative) 관리**, K8s 전체를 관통하는 핵심 철학.
+
+### 정리
+- Pod = 실행 단위 (일회용, 불안정)
+- ReplicaSet = Pod 개수 유지 (Deployment가 자동 관리)
+- Deployment = 실무에서 실제로 다루는 단위
+
+→ 실무에서는 Pod를 직접 만들지 않고 거의 항상 Deployment를 통해 배포함.
