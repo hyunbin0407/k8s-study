@@ -72,3 +72,22 @@ Docker Desktop에서 켠 Kubernetes = 로컬 PC 한 대를 "1노드짜리 미니
 
 ### 클러스터에서 확인
 `kubectl get pods -A`로 봤던 `coredns-...`, `etcd-...` 등이 전부 Pod. 이미 시스템이 여러 Pod로 동작 중임을 확인함.
+
+## 클라우드 매니지드 쿠버네티스 (GKE / EKS / AKS)
+
+클라우드 업체가 **Control Plane(API server, etcd, scheduler 등)을 대신 관리**해주는 쿠버네티스 서비스. 직접 구축 시 필요한 HA 구성, 보안 패치, 업그레이드 부담을 줄여줌.
+
+| | GKE (Google) | EKS (Amazon) | AKS (Azure) |
+|---|---|---|---|
+| 특징 | 쿠버네티스 원조 개발사, 자동화 수준 높음 (Autopilot 모드) | AWS 생태계(IAM, VPC, ALB 등)와 깊게 통합 | Control Plane **무료**, MS 생태계와 통합 |
+| Control Plane 비용 | 유료 | 유료 | 무료 (워커 노드만 과금) |
+| 어울리는 경우 | GCP 사용 중, K8s 깊게 활용 | 이미 AWS 사용 중 | 이미 Azure/엔터프라이즈 MS 환경 |
+
+### 공통점
+셋 다 **표준 쿠버네티스**. `kubectl`, YAML 매니페스트, Pod/Deployment/Service 개념이 어디서나 동일하게 적용됨. 차이는 "클러스터를 누가/어떻게 관리하느냐"일 뿐, 사용법 자체는 동일.
+
+### 학습 경로
+```
+로컬 학습(Docker Desktop, 1노드) → 실무(GKE/EKS/AKS, 여러 노드)
+```
+로컬에서 배운 개념·명령어가 그대로 통함. 클라우드로 넘어갈 땐 "클러스터 만드는 법"만 추가로 배우면 됨. 가입 시 크레딧 제공하는 경우가 많아 나중에 실습 가능 — 지금은 로컬 학습에 집중 추천.
