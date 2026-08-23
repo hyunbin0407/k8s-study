@@ -174,3 +174,46 @@ spec:
 - Deployment = 실무에서 실제로 다루는 단위
 
 → 실무에서는 Pod를 직접 만들지 않고 거의 항상 Deployment를 통해 배포함.
+
+## Service란?
+
+여러 Pod에 안정적으로 접근할 수 있게 해주는 고정된 접속 지점. Pod 앞단의 "고정 IP + 로드밸런서" 역할.
+
+### 필요한 이유
+Pod는 재생성될 때마다 IP가 바뀜 → 다른 앱이 Pod IP를 직접 알고 통신하면 Pod 재시작 시 장애 발생. Service가 고정 주소를 두고 그 뒤의 실제 Pod로 요청을 자동 전달해 해결.
+
+### 동작 원리
+- **Label(라벨)** 기준으로 어떤 Pod들에게 트래픽을 보낼지 결정 (Label Selector)
+- Pod가 죽고 새로 생겨도 같은 라벨이면 Service가 자동으로 추적/연결
+- 선언적으로 정의: "이 라벨을 가진 Pod들한테 트래픽 보내줘"
+
+### 3가지 주요 타입
+| 타입 | 설명 | 범위 |
+|---|---|---|
+| ClusterIP (기본값) | 클러스터 내부 전용 가상 IP | 내부만 (백엔드↔DB 등) |
+| NodePort | 각 노드의 특정 포트로 외부 접근 가능 | 외부 (개발/테스트용) |
+| LoadBalancer | 클라우드(GKE/EKS/AKS)의 로드밸런서 자동 생성 | 외부 (운영 표준) |
+
+### YAML 예시
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  selector:
+    app: nginx        # Deployment의 labels: app: nginx 와 매칭
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP
+```
+Deployment의 `labels`와 Service의 `selector`가 연결되는 게 핵심 — Deployment가 만든 Pod들 = Service selector가 찾는 대상.
+
+### 3종 세트 흐름 정리
+```
+Deployment → Pod 3개 유지 (라벨: app=nginx)
+                ↑ selector로 연결
+Service    → app=nginx 라벨 Pod들에 고정 주소로 접근 가능하게 함
+```
+Pod + Deployment + Service = 쿠버네티스에서 가장 기본적으로 함께 쓰이는 3종 세트. 이 조합으로 간단한 앱 배포/노출까지 가능.
