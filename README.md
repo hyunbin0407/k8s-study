@@ -7,6 +7,8 @@
 | 날짜 | 주제 | 링크 |
 | --- | --- | --- |
 | 2026-08-23 | Docker Desktop 설치 & Kubernetes 활성화 | [notes/2026-08-23.md](notes/2026-08-23.md) |
+| 2026-08-23 | 개념: 쿠버네티스 개요, 컨테이너, Pod, 매니지드 K8s, kubeadm/kubespray, Deployment, Service | [notes/concepts.md](notes/concepts.md) |
+| 2026-08-23 | 실습 01: Deployment + Service로 nginx 배포 | [notes/2026-08-23-practice-01.md](notes/2026-08-23-practice-01.md) |
 
 ## 환경
 
