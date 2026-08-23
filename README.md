@@ -10,6 +10,7 @@
 | 2026-08-23 | 개념: 쿠버네티스 개요, 컨테이너, Pod, 매니지드 K8s, kubeadm/kubespray, Deployment, Service | [notes/concepts.md](notes/concepts.md) |
 | 2026-08-23 | 실습 01 (Claude 대행 기록) | [notes/2026-08-23-practice-01.md](notes/2026-08-23-practice-01.md) |
 | 2026-08-23 | 실습 01 가이드 (직접 해보기) | [notes/practice-01-guide.md](notes/practice-01-guide.md) |
+| 2026-08-23 | 실습 01 — 직접 완주! (nano로 YAML 작성) | [notes/2026-08-23-practice-01-selfdone.md](notes/2026-08-23-practice-01-selfdone.md) |
 
 ## 환경
 
