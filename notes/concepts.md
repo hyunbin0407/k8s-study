@@ -91,3 +91,34 @@ Docker Desktop에서 켠 Kubernetes = 로컬 PC 한 대를 "1노드짜리 미니
 로컬 학습(Docker Desktop, 1노드) → 실무(GKE/EKS/AKS, 여러 노드)
 ```
 로컬에서 배운 개념·명령어가 그대로 통함. 클라우드로 넘어갈 땐 "클러스터 만드는 법"만 추가로 배우면 됨. 가입 시 크레딧 제공하는 경우가 많아 나중에 실습 가능 — 지금은 로컬 학습에 집중 추천.
+
+## 클러스터를 직접 구성하는 도구 (kubeadm / kubespray)
+
+매니지드 서비스(GKE/EKS/AKS) 대신, 온프레미스/베어메탈/직접 VM에 손으로 클러스터를 설치할 때 쓰는 도구들.
+
+### kubeadm
+- 쿠버네티스 공식(SIG) 제공 도구. 노드 하나하나에 구성요소를 설치하고 클러스터로 묶어줌
+- `kubeadm init` (control-plane 초기화) → `kubeadm join` (worker 노드 합류)
+- 장점: 표준, 공식 문서 기준, 내부 동작 이해에 좋음
+- 단점: 자동화 없음 — 노드마다 수동 실행 필요
+- 적합: 학습용, 소규모 클러스터
+- 참고: Docker Desktop의 Kubernetes도 내부적으로 kubeadm과 유사한 방식(정확히는 kind 기반)으로 단일 노드를 구성함
+
+### kubespray
+- kubeadm을 Ansible로 감싸 여러 서버에 **자동 배포**해주는 도구
+- 서버 목록(inventory) 정의만 하면 Ansible이 SSH로 모든 노드에 접속해 kubeadm 과정을 순서대로 자동 실행
+- HA Control Plane, CNI 플러그인 선택 등 옵션 지원
+- 적합: 중대규모 온프레미스 클러스터
+
+### 비교
+| | kubeadm | kubespray |
+|---|---|---|
+| 성격 | 저수준, 노드별 수동 | kubeadm + Ansible 자동화 |
+| 규모 | 소규모/학습용 | 중대규모 온프레미스 |
+
+### 클러스터를 얻는 3가지 방법 정리
+1. **매니지드**: GKE/EKS/AKS — 클라우드가 Control Plane 관리
+2. **직접 구축**: kubeadm(수동) / kubespray(자동화, 온프레미스)
+3. **로컬 학습용**: Docker Desktop / minikube / kind — 내 PC에서 미니 클러스터 (현재 사용 중)
+
+→ 클러스터 구축은 인프라 영역, 지금은 쿠버네티스 "사용법"(Pod/Deployment/Service) 학습에 집중하는 게 우선.
