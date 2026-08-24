@@ -167,3 +167,52 @@ Deployment → Pod 3개 유지 (라벨: app=nginx)
 Service    → app=nginx 라벨 Pod들에 고정 주소로 접근 가능하게 함
 ```
 Pod + Deployment + Service = 쿠버네티스에서 가장 기본적으로 함께 쓰이는 3종 세트. 이 조합으로 간단한 앱 배포/노출까지 가능.
+
+## 롤링 업데이트(Rolling Update)란?
+
+Deployment의 이미지 버전(또는 스펙)을 바꿀 때, Pod를 한꺼번에 다 교체하지 않고 몇 개씩 순차적으로 바꿔가며 **무중단으로 배포**하는 방식.
+
+### 필요한 이유
+3개 Pod를 한 번에 다 내리고 새 버전으로 띄우면, 교체되는 동안 서비스가 완전히 죽는 다운타임 발생. 롤링 업데이트는 항상 일정 개수 이상의 Pod가 살아서 트래픽을 받는 상태를 유지하며 점진적으로 교체.
+
+### 동작 원리
+이미지 버전을 바꾸면 Deployment는 새 버전을 위한 **새 ReplicaSet**을 만들고, 기존 ReplicaSet은 점점 줄이면서 새 ReplicaSet을 점점 늘림.
+
+```
+[변경 전] 기존 ReplicaSet (v1): Pod 3개
+      ↓ 이미지 버전 변경
+[진행 중] 기존 ReplicaSet (v1): 3 → 2 → 1 → 0
+          새 ReplicaSet   (v2): 0 → 1 → 2 → 3
+[완료]  새 ReplicaSet(v2) 3개, 기존 ReplicaSet(v1)은 0개지만 기록은 남음 (롤백용)
+```
+
+한 번에 몇 개씩 교체할지는 두 옵션으로 조절:
+
+| 옵션 | 의미 | 기본값 |
+|---|---|---|
+| `maxUnavailable` | 업데이트 중 동시에 내려가도 되는 Pod 최대 개수 | 25% |
+| `maxSurge` | 원래 개수보다 초과해서 띄워도 되는 Pod 최대 개수 | 25% |
+
+### YAML 예시
+```yaml
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+```
+안 써도 기본 전략이 RollingUpdate라 자동 적용됨.
+
+### 관련 명령어
+| 명령어 | 역할 |
+|---|---|
+| `kubectl set image deployment/이름 컨테이너명=이미지:버전` | 이미지 버전 변경 → 롤링 업데이트 트리거 |
+| `kubectl rollout status deployment/이름` | 진행 상황 실시간 확인 |
+| `kubectl rollout history deployment/이름` | 배포 이력 확인 |
+| `kubectl rollout undo deployment/이름` | 바로 직전 버전으로 롤백 |
+
+### 정리
+- 목적: 무중단 배포
+- 방법: 새 ReplicaSet을 늘리면서 기존 ReplicaSet을 줄임
+- 문제 생기면 `rollout undo`로 즉시 롤백 가능 — 이전 ReplicaSet이 남아있어서 가능
