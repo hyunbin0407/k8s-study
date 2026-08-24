@@ -14,6 +14,7 @@
 | 2026-08-23 | 실습 01 — 직접 완주! (nano로 YAML 작성) | [notes/2026-08-23-practice-01-selfdone.md](notes/2026-08-23-practice-01-selfdone.md) |
 | 2026-08-24 | 개념: 롤링 업데이트 | [notes/concepts.md](notes/concepts.md) |
 | 2026-08-24 | 실습 02 가이드 (롤링 업데이트 & 롤백, 직접 해보기) | [notes/practice-02-guide.md](notes/practice-02-guide.md) |
+| 2026-08-24 | 실습 02 — 직접 완주! (롤링 업데이트 & 롤백) | [notes/2026-08-24-practice-02-selfdone.md](notes/2026-08-24-practice-02-selfdone.md) |
 
 ## 환경
 

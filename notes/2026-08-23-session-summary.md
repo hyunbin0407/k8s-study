@@ -45,9 +45,13 @@
 - GitHub 레포: `main` 브랜치에 위 내용 전부 커밋/푸시 완료
 
 ## 다음에 이어서 할 만한 것
-- [ ] 롤링 업데이트 실습 (이미지 버전 변경 → 무중단 배포 확인)
+- [x] 롤링 업데이트 실습 (이미지 버전 변경 → 무중단 배포 확인) — 2026-08-24 완료, [notes/2026-08-24-practice-02-selfdone.md](2026-08-24-practice-02-selfdone.md)
 - [ ] 스케일링 실습 (`kubectl scale`로 Pod 개수 조절)
 - [ ] ConfigMap / Secret 개념 — 설정값을 코드와 분리하기
 - [ ] Namespace 개념
 - [ ] Volume / PersistentVolume 개념 (스토리지)
 - [ ] Ingress 개념 (Service보다 상위의 외부 노출 방식)
+
+## 2026-08-24 추가 진행
+- 개념: **롤링 업데이트** ([notes/concepts.md](concepts.md) 추가)
+- 실습 02: nginx Deployment 이미지를 `latest → 1.25 → 1.26`으로 순차 업데이트하며 Pod가 하나씩 교체되는 과정을 `-w`로 실시간 관찰, `rollout undo`로 롤백, 존재하지 않는 이미지 태그로 실패 시나리오까지 직접 겪어봄 (기존 정상 Pod는 안 죽는 것 확인). 가이드로 안내 → 본인이 직접 진행, 전부 성공. 실습 후 리소스 정리 완료.
