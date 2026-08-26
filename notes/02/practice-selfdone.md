@@ -1,6 +1,6 @@
 # 실습 02 — 직접 완주! 롤링 업데이트 & 롤백
 
-가이드: [practice-02-guide.md](practice-02-guide.md)
+가이드: [practice-guide.md](practice-guide.md)
 
 ## 진행 내용
 

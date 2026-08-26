@@ -1,7 +1,7 @@
-# 2026-08-24 세션 요약
+# 2026-08-24 세션 요약 (2회차)
 
 오늘 대화를 진행 순서대로 번호 매겨 정리. 다음 세션 시작 전에 이 파일부터 읽으면 이어서 진행하기 좋음.
-(이전 세션 요약: [2026-08-23-session-summary.md](2026-08-23-session-summary.md))
+(이전 세션 요약: [notes/01/session-summary.md](../01/session-summary.md))
 
 ## 오늘 한 일 순서
 
@@ -11,7 +11,7 @@
 
 3. **롤링 업데이트 개념 설명 요청** — 개념 설명 (새 ReplicaSet을 늘리고 기존 ReplicaSet을 줄이는 방식, `maxUnavailable`/`maxSurge`, 관련 명령어 `set image`/`rollout status`/`rollout history`/`rollout undo`). `notes/concepts.md`에 정리해서 커밋.
 
-4. **실습 진행 요청 ("가이드로 안내해서 내가 해볼게")** — `notes/practice-02-guide.md` 작성, 커밋. 이후 사용자가 가이드를 보며 직접 실습 진행, 단계별로 결과를 붙여넣으면 확인하는 방식으로 진행:
+4. **실습 진행 요청 ("가이드로 안내해서 내가 해볼게")** — `notes/02/practice-guide.md` 작성, 커밋. 이후 사용자가 가이드를 보며 직접 실습 진행, 단계별로 결과를 붙여넣으면 확인하는 방식으로 진행:
    - **4-1.** 지난 실습에서 정리했던 nginx Deployment+Service 재배포 → 이미지 `latest → 1.25`로 변경, `rollout status` 정상 확인
    - **4-2.** 터미널 두 개로 `1.25 → 1.26` 업데이트를 `-w`로 실시간 관찰 → Pod가 **하나씩** `Pending → Running` 되고 나서야 기존 Pod 하나가 `Terminating`되는 순서 확인
    - **4-3.** 결과 검증 — 새 ReplicaSet 소속 Pod로 전부 교체, 이미지 `1.26`, replicas 3개 유지, 예전 ReplicaSet은 `DESIRED 0`으로 이력에 남는 것 확인
@@ -21,11 +21,11 @@
    - **4-7.** `rollout undo`로 재복구 — 이번엔 기존 Pod가 애초에 안 흔들려서 Pod 이름/AGE 그대로 유지된 채 복구됨
    - **4-8.** `kubectl delete -f`로 리소스 정리 완료
 
-5. **완주 기록 저장** — `notes/2026-08-24-practice-02-selfdone.md` 작성, README/세션요약 갱신 후 커밋+푸시.
+5. **완주 기록 저장** — `notes/02/practice-selfdone.md` 작성, README/세션요약 갱신 후 커밋+푸시.
 
 6. **다음 실습 제안** — 스케일링(`kubectl scale`)이 다음 추천 순서로 제시됨 (아직 미착수).
 
-7. **"지금까지 대화한거 저장해줘" 요청** — 이 세션 요약 파일(`2026-08-24-session-summary.md`) 작성, README의 "다음에 여기부터" 항목을 이 파일로 갱신, 메모리 파일도 갱신 후 커밋+푸시.
+7. **"지금까지 대화한거 저장해줘" 요청** — 이 세션 요약 파일(`notes/02/session-summary.md`) 작성, README의 "다음에 여기부터" 항목을 이 파일로 갱신, 메모리 파일도 갱신 후 커밋+푸시.
 
 8. **(현재) 이 요약을 번호순으로 재정리 요청** — 지금 이 문서를 대화 진행 순서 그대로 번호 매겨 다시 정리.
 

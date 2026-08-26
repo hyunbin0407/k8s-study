@@ -1,4 +1,4 @@
-# 2026-08-23 세션 요약
+# 2026-08-23 세션 요약 (1회차)
 
 오늘 하루 동안 진행한 전체 흐름 요약. 다음 세션 시작 전에 이 파일부터 읽으면 이어서 진행하기 좋음.
 
@@ -27,7 +27,7 @@
 > 한 번 설명했다가 **사용자 요청으로 `concepts.md`에서 삭제함** (2026-08-23). 필요하면 다시 설명 가능.
 
 ## 완료한 실습 — 실습 01: Deployment + Service로 nginx 배포
-- 관련 파일: [practice-01-guide.md](practice-01-guide.md) (가이드), [2026-08-23-practice-01-selfdone.md](2026-08-23-practice-01-selfdone.md) (직접 완주 기록)
+- 관련 파일: [practice-guide.md](practice-guide.md) (가이드), [practice-selfdone.md](practice-selfdone.md) (직접 완주 기록)
 - Deployment YAML(`manifests/01-nginx-deployment.yaml`), Service YAML(`manifests/02-nginx-service.yaml`)을 nano로 직접 작성
 - `kubectl apply` → 3개 Pod 정상 배포 확인 (`get deployment/replicaset/pods/service`)
 - `kubectl describe pod`, `kubectl logs`로 상세 정보 확인
@@ -45,7 +45,7 @@
 - GitHub 레포: `main` 브랜치에 위 내용 전부 커밋/푸시 완료
 
 ## 다음에 이어서 할 만한 것
-- [x] 롤링 업데이트 실습 (이미지 버전 변경 → 무중단 배포 확인) — 2026-08-24 완료, [notes/2026-08-24-practice-02-selfdone.md](2026-08-24-practice-02-selfdone.md)
+- [x] 롤링 업데이트 실습 (이미지 버전 변경 → 무중단 배포 확인) — 2026-08-24 완료, [notes/02/practice-selfdone.md](../02/practice-selfdone.md)
 - [ ] 스케일링 실습 (`kubectl scale`로 Pod 개수 조절)
 - [ ] ConfigMap / Secret 개념 — 설정값을 코드와 분리하기
 - [ ] Namespace 개념
@@ -53,5 +53,5 @@
 - [ ] Ingress 개념 (Service보다 상위의 외부 노출 방식)
 
 ## 2026-08-24 추가 진행
-- 개념: **롤링 업데이트** ([notes/concepts.md](concepts.md) 추가)
+- 개념: **롤링 업데이트** ([notes/concepts.md](../concepts.md) 추가)
 - 실습 02: nginx Deployment 이미지를 `latest → 1.25 → 1.26`으로 순차 업데이트하며 Pod가 하나씩 교체되는 과정을 `-w`로 실시간 관찰, `rollout undo`로 롤백, 존재하지 않는 이미지 태그로 실패 시나리오까지 직접 겪어봄 (기존 정상 Pod는 안 죽는 것 확인). 가이드로 안내 → 본인이 직접 진행, 전부 성공. 실습 후 리소스 정리 완료.

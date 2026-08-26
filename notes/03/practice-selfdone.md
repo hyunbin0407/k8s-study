@@ -1,6 +1,6 @@
 # 실습 03 — 직접 완주! 스케일링
 
-가이드: [practice-03-guide.md](practice-03-guide.md)
+가이드: [practice-guide.md](practice-guide.md)
 
 ## 진행 내용
 

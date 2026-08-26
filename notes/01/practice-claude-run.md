@@ -2,7 +2,7 @@
 
 > 이 실습은 처음에 Claude가 대신 실행한 결과 기록입니다. 같은 내용을 직접 손으로 다시 해보기 위해
 > 클러스터 리소스와 YAML 파일은 정리(삭제)했습니다. 아래는 그때의 진행 기록이고, 직접 해보는 가이드는
-> [notes/practice-01-guide.md](practice-01-guide.md) 를 참고하세요.
+> [practice-guide.md](practice-guide.md) 를 참고하세요.
 
 ## 목표
 Pod / Deployment / Service 개념을 실제로 만들어보고 동작 확인
@@ -50,4 +50,4 @@ curl http://localhost:8080
 ## 정리
 - Deployment = "원하는 상태" 선언 → ReplicaSet이 실제로 유지 → Pod가 실행 단위
 - Service = Pod IP가 바뀌어도 안 변하는 고정 접속점, 라벨 기반 라우팅
-- 개념 문서([concepts.md](concepts.md))에서 배운 내용이 실제로 동일하게 동작함을 확인
+- 개념 문서([concepts.md](../concepts.md))에서 배운 내용이 실제로 동일하게 동작함을 확인

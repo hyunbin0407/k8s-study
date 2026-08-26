@@ -1,6 +1,6 @@
 # 실습 01 — 직접 완주 기록 (nano로 YAML 작성)
 
-> [practice-01-guide.md](practice-01-guide.md) 가이드를 보고 실제로 손으로 진행한 기록.
+> [practice-guide.md](practice-guide.md) 가이드를 보고 실제로 손으로 진행한 기록.
 
 ## 진행 과정
 

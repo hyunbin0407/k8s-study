@@ -4,22 +4,17 @@
 
 ## 진행 기록
 
-| 날짜 | 주제 | 링크 |
-| --- | --- | --- |
-| 2026-08-26 | **세션 요약 (다음에 여기부터)** | [notes/2026-08-26-session-summary.md](notes/2026-08-26-session-summary.md) |
-| 2026-08-24 | 세션 요약 | [notes/2026-08-24-session-summary.md](notes/2026-08-24-session-summary.md) |
-| 2026-08-23 | 세션 요약 | [notes/2026-08-23-session-summary.md](notes/2026-08-23-session-summary.md) |
-| 2026-08-23 | Docker Desktop 설치 & Kubernetes 활성화 | [notes/2026-08-23.md](notes/2026-08-23.md) |
-| 2026-08-23 | 개념: 쿠버네티스 개요, 컨테이너, Pod, Deployment, Service | [notes/concepts.md](notes/concepts.md) |
-| 2026-08-23 | 실습 01 (Claude 대행 기록) | [notes/2026-08-23-practice-01.md](notes/2026-08-23-practice-01.md) |
-| 2026-08-23 | 실습 01 가이드 (직접 해보기) | [notes/practice-01-guide.md](notes/practice-01-guide.md) |
-| 2026-08-23 | 실습 01 — 직접 완주! (nano로 YAML 작성) | [notes/2026-08-23-practice-01-selfdone.md](notes/2026-08-23-practice-01-selfdone.md) |
-| 2026-08-24 | 개념: 롤링 업데이트 | [notes/concepts.md](notes/concepts.md) |
-| 2026-08-24 | 실습 02 가이드 (롤링 업데이트 & 롤백, 직접 해보기) | [notes/practice-02-guide.md](notes/practice-02-guide.md) |
-| 2026-08-24 | 실습 02 — 직접 완주! (롤링 업데이트 & 롤백) | [notes/2026-08-24-practice-02-selfdone.md](notes/2026-08-24-practice-02-selfdone.md) |
-| 2026-08-26 | 개념: 스케일링 | [notes/concepts.md](notes/concepts.md) |
-| 2026-08-26 | 실습 03 가이드 (스케일링, 직접 해보기) | [notes/practice-03-guide.md](notes/practice-03-guide.md) |
-| 2026-08-26 | 실습 03 — 직접 완주! (스케일링) | [notes/2026-08-26-practice-03-selfdone.md](notes/2026-08-26-practice-03-selfdone.md) |
+개념은 [notes/concepts.md](notes/concepts.md)에 계속 누적 정리합니다. 그 외 실습/세션 기록은 회차별 폴더로 관리합니다 — 각 폴더의 `session-summary.md`가 그 회차의 입구입니다.
+
+| 회차 | 날짜 | 내용 | 폴더 |
+| --- | --- | --- | --- |
+| 3 (최신, 다음에 여기부터) | 2026-08-26 | 스케일링 | [notes/03/](notes/03/) |
+| 2 | 2026-08-24 | 롤링 업데이트 & 롤백 | [notes/02/](notes/02/) |
+| 1 | 2026-08-23 | 환경 세팅, 기본 개념(Pod/Deployment/Service), nginx 배포 | [notes/01/](notes/01/) |
+
+## 개념 사전
+
+[notes/concepts.md](notes/concepts.md) — 쿠버네티스 개요, 컨테이너, Pod, Deployment, Service, 롤링 업데이트, 스케일링 등 지금까지 배운 개념 전부.
 
 ## 환경
 
