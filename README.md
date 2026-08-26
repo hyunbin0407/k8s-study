@@ -4,12 +4,10 @@
 
 ## 진행 기록
 
-
-
 | 날짜 | 주제 | 링크 |
-
 | --- | --- | --- |
-| 2026-08-24 | **세션 요약 (다음에 여기부터)** | [notes/2026-08-24-session-summary.md](notes/2026-08-24-session-summary.md) |
+| 2026-08-26 | **세션 요약 (다음에 여기부터)** | [notes/2026-08-26-session-summary.md](notes/2026-08-26-session-summary.md) |
+| 2026-08-24 | 세션 요약 | [notes/2026-08-24-session-summary.md](notes/2026-08-24-session-summary.md) |
 | 2026-08-23 | 세션 요약 | [notes/2026-08-23-session-summary.md](notes/2026-08-23-session-summary.md) |
 | 2026-08-23 | Docker Desktop 설치 & Kubernetes 활성화 | [notes/2026-08-23.md](notes/2026-08-23.md) |
 | 2026-08-23 | 개념: 쿠버네티스 개요, 컨테이너, Pod, Deployment, Service | [notes/concepts.md](notes/concepts.md) |
@@ -21,6 +19,7 @@
 | 2026-08-24 | 실습 02 — 직접 완주! (롤링 업데이트 & 롤백) | [notes/2026-08-24-practice-02-selfdone.md](notes/2026-08-24-practice-02-selfdone.md) |
 | 2026-08-26 | 개념: 스케일링 | [notes/concepts.md](notes/concepts.md) |
 | 2026-08-26 | 실습 03 가이드 (스케일링, 직접 해보기) | [notes/practice-03-guide.md](notes/practice-03-guide.md) |
+| 2026-08-26 | 실습 03 — 직접 완주! (스케일링) | [notes/2026-08-26-practice-03-selfdone.md](notes/2026-08-26-practice-03-selfdone.md) |
 
 ## 환경
 
