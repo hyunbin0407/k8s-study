@@ -216,3 +216,29 @@ spec:
 - 목적: 무중단 배포
 - 방법: 새 ReplicaSet을 늘리면서 기존 ReplicaSet을 줄임
 - 문제 생기면 `rollout undo`로 즉시 롤백 가능 — 이전 ReplicaSet이 남아있어서 가능
+
+## 스케일링(Scaling)이란?
+
+Deployment가 유지하는 Pod 개수(`replicas`)를 늘리거나 줄이는 것. 트래픽이 늘면 Pod를 늘려 부하를 분산하고, 줄면 다시 줄여 자원을 아낌.
+
+### 방법
+| 방법 | 명령어/설정 | 특징 |
+|---|---|---|
+| 수동 스케일링 | `kubectl scale deployment/이름 --replicas=5` | 지금 당장 개수를 명시적으로 지정 |
+| YAML 수정 | `replicas: 5`로 바꾸고 `kubectl apply` | 선언적 방식, 코드로 관리 (실무에서 더 선호) |
+| 자동 스케일링(HPA) | `kubectl autoscale` / `HorizontalPodAutoscaler` | CPU/메모리 사용률 등 지표 기반으로 자동 조절 (추후 별도 주제) |
+
+### 동작 원리
+Deployment의 `replicas` 값을 바꾸면 ReplicaSet이 그 숫자에 맞춰 Pod를 추가 생성하거나 초과분을 삭제.
+
+```
+kubectl scale --replicas=5
+     ↓
+기존 ReplicaSet: Pod 3개 → 5개 (2개 새로 생성)
+```
+
+**롤링 업데이트와의 차이**: 롤링 업데이트는 이미지가 바뀌어서 **새 ReplicaSet**이 생기지만, 스케일링은 이미지는 그대로고 개수만 바뀌는 거라 **기존 ReplicaSet 그대로 Pod 개수만** 조정됨. 줄일 때 어떤 Pod가 삭제될지는 K8s가 알아서 선택.
+
+### 정리
+- 목적: 부하에 맞게 Pod 개수 조절 (수평 확장/축소)
+- 롤링 업데이트: ReplicaSet이 바뀜 / 스케일링: 같은 ReplicaSet 안에서 개수만 바뀜

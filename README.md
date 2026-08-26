@@ -5,7 +5,9 @@
 ## 진행 기록
 
 
+
 | 날짜 | 주제 | 링크 |
+
 | --- | --- | --- |
 | 2026-08-24 | **세션 요약 (다음에 여기부터)** | [notes/2026-08-24-session-summary.md](notes/2026-08-24-session-summary.md) |
 | 2026-08-23 | 세션 요약 | [notes/2026-08-23-session-summary.md](notes/2026-08-23-session-summary.md) |
@@ -17,6 +19,8 @@
 | 2026-08-24 | 개념: 롤링 업데이트 | [notes/concepts.md](notes/concepts.md) |
 | 2026-08-24 | 실습 02 가이드 (롤링 업데이트 & 롤백, 직접 해보기) | [notes/practice-02-guide.md](notes/practice-02-guide.md) |
 | 2026-08-24 | 실습 02 — 직접 완주! (롤링 업데이트 & 롤백) | [notes/2026-08-24-practice-02-selfdone.md](notes/2026-08-24-practice-02-selfdone.md) |
+| 2026-08-26 | 개념: 스케일링 | [notes/concepts.md](notes/concepts.md) |
+| 2026-08-26 | 실습 03 가이드 (스케일링, 직접 해보기) | [notes/practice-03-guide.md](notes/practice-03-guide.md) |
 
 ## 환경
 
