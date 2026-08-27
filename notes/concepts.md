@@ -242,3 +242,45 @@ kubectl scale --replicas=5
 ### 정리
 - 목적: 부하에 맞게 Pod 개수 조절 (수평 확장/축소)
 - 롤링 업데이트: ReplicaSet이 바뀜 / 스케일링: 같은 ReplicaSet 안에서 개수만 바뀜
+
+## ConfigMap이란?
+
+애플리케이션의 **설정값을 컨테이너 이미지/코드와 분리**해서 관리할 수 있게 해주는 오브젝트. 환경변수, 설정 파일 내용 등을 담아두고 Pod에 주입해서 씀.
+
+### 필요한 이유
+설정값(DB 주소, 로그 레벨, 기능 플래그 등)을 코드/이미지에 하드코딩하면 설정 하나 바꿀 때마다 이미지를 다시 빌드해야 하고, 환경(개발/스테이징/운영)마다 다른 이미지가 필요해짐. ConfigMap을 쓰면 **같은 이미지**를 그대로 두고 환경별로 다른 ConfigMap만 연결해 설정을 다르게 줄 수 있음.
+
+### Pod에 주입하는 방법
+| 방법 | 설명 |
+|---|---|
+| 환경변수(`envFrom`/`env`) | ConfigMap의 key-value를 컨테이너 환경변수로 주입 |
+| 볼륨(파일)로 마운트 | ConfigMap 내용을 파일로 만들어 컨테이너 안 특정 경로에 마운트 |
+
+### YAML 예시
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  GREETING: "Hello from ConfigMap"
+  LOG_LEVEL: "debug"
+```
+```yaml
+# Deployment 쪽에서 참조
+containers:
+  - name: nginx
+    envFrom:
+      - configMapRef:
+          name: nginx-config
+```
+
+### 중요한 특징
+- **환경변수로 주입한 경우, ConfigMap을 수정해도 이미 떠있는 Pod에는 반영 안 됨** — 환경변수는 컨테이너 시작 시점에 한 번 값이 고정되기 때문. 반영하려면 Pod를 재생성해야 함 (`kubectl rollout restart` 등)
+- **볼륨(파일)로 마운트한 경우는 시간차를 두고 파일 내용이 자동 갱신됨** (kubelet이 주기적으로 동기화) — 다만 앱이 그 파일 변경을 다시 읽어야 실제로 반영됨
+- **민감한 정보(비밀번호, API 키 등)는 ConfigMap에 넣으면 안 됨** — 평문 저장이라 누구나 조회 가능. 그런 건 **Secret**을 사용 (구조는 거의 같지만 base64 인코딩 + 접근 제어가 추가됨)
+
+### 정리
+- 목적: 설정을 코드와 분리해서 이미지 재빌드 없이 환경별로 다른 설정 적용
+- 환경변수 주입은 Pod 재생성 필요, 파일 마운트는 자동 동기화(단, 앱이 다시 읽어야 함)
+- 민감 정보는 ConfigMap이 아니라 Secret으로
