@@ -284,3 +284,46 @@ containers:
 - 목적: 설정을 코드와 분리해서 이미지 재빌드 없이 환경별로 다른 설정 적용
 - 환경변수 주입은 Pod 재생성 필요, 파일 마운트는 자동 동기화(단, 앱이 다시 읽어야 함)
 - 민감 정보는 ConfigMap이 아니라 Secret으로
+
+## Secret이란?
+
+ConfigMap과 구조는 거의 같지만, **민감한 정보**(비밀번호, API 키, 인증서, 토큰 등)를 다루기 위한 전용 오브젝트.
+
+### ConfigMap과 다른 점
+| | ConfigMap | Secret |
+|---|---|---|
+| 용도 | 일반 설정값 | 민감한 정보 |
+| 저장 방식 | 평문 | **base64 인코딩** (암호화 아님, 인코딩일 뿐) |
+| `kubectl get -o yaml` | 값이 그대로 보임 | base64로 인코딩되어 보임 |
+| 접근 제어 | 상대적으로 느슨 | RBAC으로 더 엄격하게 제한 가능 |
+
+**중요**: base64는 암호화가 아니라 그냥 인코딩. `base64 -d`로 누구나 즉시 원문을 볼 수 있음. Secret 자체가 "완벽히 안전"한 게 아니라, 민감정보임을 명시하고 접근을 통제하기 쉬운 형태로 관리하는 정도. 진짜 강력한 보안이 필요하면 Vault 같은 외부 secret 관리 도구를 연동.
+
+### Pod에 주입하는 방법
+ConfigMap과 동일 — 환경변수(`envFrom`/`env`) 또는 볼륨 마운트. 반영 시점 등 동작 원리도 ConfigMap과 같음.
+
+### YAML 예시
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nginx-secret
+type: Opaque
+data:
+  DB_PASSWORD: cGFzc3dvcmQxMjM=   # echo -n 'password123' | base64
+```
+`stringData`를 쓰면 평문으로 적어도 K8s가 알아서 base64로 저장해줌 (직접 인코딩 안 해도 돼서 실무에서 더 자주 씀):
+```yaml
+stringData:
+  DB_PASSWORD: password123
+```
+
+### 타입(`type`)
+- `Opaque` (기본값): 임의의 key-value, 가장 흔히 씀
+- `kubernetes.io/dockerconfigjson`: 프라이빗 이미지 레지스트리 인증 정보
+- `kubernetes.io/tls`: TLS 인증서/키 (Ingress에서 다시 등장)
+
+### 정리
+- 목적: 민감정보를 ConfigMap과 분리해서 명시적으로 관리
+- base64는 암호화가 아님 — 진짜 보안은 접근 제어(RBAC)나 외부 도구
+- `stringData`로 평문 입력하면 K8s가 자동으로 인코딩

@@ -9,14 +9,15 @@
 
 | 회차 | 날짜 | 내용 | 폴더 |
 | --- | --- | --- | --- |
-| 4 (최신, 다음에 여기부터) | 2026-08-27 | ConfigMap (환경변수/볼륨 마운트) | [notes/04/](notes/04/) |
+| 5 (최신, 다음에 여기부터) | 2026-08-28 | Secret | [notes/05/](notes/05/) |
+| 4 | 2026-08-27 | ConfigMap (환경변수/볼륨 마운트) | [notes/04/](notes/04/) |
 | 3 | 2026-08-26 | 스케일링 | [notes/03/](notes/03/) |
 | 2 | 2026-08-24 | 롤링 업데이트 & 롤백 | [notes/02/](notes/02/) |
 | 1 | 2026-08-23 | 환경 세팅, 기본 개념(Pod/Deployment/Service), nginx 배포 | [notes/01/](notes/01/) |
 
 ## 개념 사전
 
-[notes/concepts.md](notes/concepts.md) — 쿠버네티스 개요, 컨테이너, Pod, Deployment, Service, 롤링 업데이트, 스케일링, ConfigMap 등 지금까지 배운 개념 전부.
+[notes/concepts.md](notes/concepts.md) — 쿠버네티스 개요, 컨테이너, Pod, Deployment, Service, 롤링 업데이트, 스케일링, ConfigMap, Secret 등 지금까지 배운 개념 전부.
 
 ## 환경
 
