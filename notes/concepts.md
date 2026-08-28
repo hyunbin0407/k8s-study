@@ -256,6 +256,7 @@ kubectl scale --replicas=5
 | 환경변수(`envFrom`/`env`) | ConfigMap의 key-value를 컨테이너 환경변수로 주입 |
 | 볼륨(파일)로 마운트 | ConfigMap 내용을 파일로 만들어 컨테이너 안 특정 경로에 마운트 |
 
+
 ### YAML 예시
 ```yaml
 apiVersion: v1

@@ -19,7 +19,9 @@ spec:
             - containerPort: 80
           envFrom:
             - configMapRef:
-                name: nginx-config	
+                name: nginx-config
+            - secretRef:
+                name: nginx-secret
           volumeMounts:
             - name: config-volume
               mountPath: /etc/config
