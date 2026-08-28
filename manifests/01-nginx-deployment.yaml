@@ -17,3 +17,13 @@ spec:
           image: nginx:latest
           ports:
             - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: nginx-config	
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/config
+      volumes:
+        - name: config-volume
+          configMap:
+            name: nginx-config

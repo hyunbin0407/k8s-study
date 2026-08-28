@@ -17,10 +17,10 @@ Pod 3개가 `Running`이 될 때까지 기다린 후 다음으로 넘어가세�
 
 ## Step 1. Secret YAML 파일 만들기 (`stringData` 사용)
 
-`manifests/05-nginx-secret.yaml` 파일을 nano로 새로 만드세요.
+`manifests/04-nginx-secret.yaml` 파일을 nano로 새로 만드세요.
 
 ```bash
-nano manifests/05-nginx-secret.yaml
+nano manifests/04-nginx-secret.yaml
 ```
 
 ```yaml
@@ -38,7 +38,7 @@ stringData:
 
 저장 후 적용:
 ```bash
-kubectl apply -f manifests/05-nginx-secret.yaml
+kubectl apply -f manifests/04-nginx-secret.yaml
 kubectl get secret
 ```
 
@@ -110,7 +110,7 @@ kubectl describe deployment nginx-deployment | grep -A5 "Environment Variables f
 kubectl delete -f manifests/01-nginx-deployment.yaml
 kubectl delete -f manifests/02-nginx-service.yaml
 kubectl delete -f manifests/03-nginx-configmap.yaml
-kubectl delete -f manifests/05-nginx-secret.yaml
+kubectl delete -f manifests/04-nginx-secret.yaml
 ```
 
 ## 막혔을 때 자가진단 순서

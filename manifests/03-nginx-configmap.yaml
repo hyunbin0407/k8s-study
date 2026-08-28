@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  GREETING: "Hello from ConfigMap"
+  LOG_LEVEL: "debug-v2"
