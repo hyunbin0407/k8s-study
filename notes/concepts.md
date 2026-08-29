@@ -328,3 +328,48 @@ stringData:
 - 목적: 민감정보를 ConfigMap과 분리해서 명시적으로 관리
 - base64는 암호화가 아님 — 진짜 보안은 접근 제어(RBAC)나 외부 도구
 - `stringData`로 평문 입력하면 K8s가 자동으로 인코딩
+
+## Namespace란?
+
+하나의 쿠버네티스 클러스터 안에서 리소스들을 **논리적으로 나누는 가상의 구역**. 지금까지 실습에서 아무 옵션 없이 쓰던 게 사실 `default`라는 이름의 Namespace 안이었음.
+
+### 필요한 이유
+클러스터 하나를 여러 팀/프로젝트/환경이 같이 쓸 때, 이름이 겹치거나 리소스가 뒤섞이는 걸 막기 위함.
+- **환경 분리**: `dev`/`staging`/`production`을 같은 클러스터에서 격리
+- **팀/프로젝트 분리**: RBAC과 결합해 팀별 접근 권한 통제 가능
+- **리소스 관리**: Namespace별 CPU/메모리 사용량 제한(ResourceQuota) 가능
+
+### 이미 써왔던 개념
+`kubectl get pods -A`의 `-A`가 모든 Namespace를 조회하는 옵션. `kube-system`, `local-path-storage`가 전부 Namespace 이름이고, 우리가 만든 nginx는 항상 `default` Namespace였음.
+
+### 동작 원리
+- 대부분 리소스(Pod, Deployment, Service, ConfigMap, Secret 등)는 특정 Namespace에 속함 — **Namespaced 리소스**
+- Node, PersistentVolume 등 클러스터 전체에 걸친 건 Namespace 없음 — **Cluster-scoped 리소스**
+- 같은 이름이어도 **Namespace가 다르면 별개의 리소스**
+
+### YAML 예시
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev
+```
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  namespace: dev
+```
+```bash
+kubectl apply -f deployment.yaml -n dev
+kubectl get pods -n dev
+```
+
+### 서로 다른 Namespace 간 통신
+같은 Namespace 안에서는 Service 이름만으로 접근 가능하지만(`nginx-service`), 다른 Namespace에서 접근하려면 `<서비스이름>.<네임스페이스>.svc.cluster.local` 형식의 전체 DNS 이름 필요.
+
+### 정리
+- 목적: 하나의 클러스터를 논리적으로 나눠서 격리·관리
+- 지정 안 하면 전부 `default` Namespace
+- 같은 이름이라도 Namespace가 다르면 별개 리소스
