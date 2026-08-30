@@ -10,6 +10,12 @@ kubectl get pods -A | grep nginx
 ```
 아무것도 안 나오는지 확인하세요.
 
+이번 실습의 Deployment는 ConfigMap/Secret도 계속 참조하므로, 먼저 그것들부터 배포해둡니다.
+```bash
+kubectl apply -f manifests/03-nginx-configmap.yaml
+kubectl apply -f manifests/04-nginx-secret.yaml
+```
+
 ## Step 1. PersistentVolumeClaim(PVC) YAML 만들기
 
 `manifests/06-nginx-pvc.yaml` 파일을 nano로 새로 만드세요.
