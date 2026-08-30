@@ -373,3 +373,55 @@ kubectl get pods -n dev
 - 목적: 하나의 클러스터를 논리적으로 나눠서 격리·관리
 - 지정 안 하면 전부 `default` Namespace
 - 같은 이름이라도 Namespace가 다르면 별개 리소스
+
+## Volume / PersistentVolume이란?
+
+컨테이너/Pod가 사용하는 **데이터를 저장하는 공간**. 컨테이너는 재시작되면 그 안의 파일이 전부 사라지는데(불변/일회용), Volume을 쓰면 데이터를 컨테이너 생명주기와 분리해서 유지할 수 있음.
+
+### 필요한 이유
+컨테이너 안에 쓴 파일은 컨테이너가 죽으면 같이 사라짐 (이미지는 읽기 전용, 컨테이너의 쓰기 레이어는 임시). DB 데이터, 업로드 파일처럼 없어지면 안 되는 데이터는 컨테이너 밖의 별도 저장 공간에 둬야 함.
+
+### 두 가지 레벨
+| | Volume | PersistentVolume(PV) |
+|---|---|---|
+| 생명주기 | **Pod와 함께** 생성/삭제 | Pod와 **무관하게** 독립적으로 존재 |
+| 용도 | 같은 Pod 안 컨테이너 간 파일 공유, 임시 캐시 | Pod가 재생성돼도 계속 남아야 하는 데이터 |
+| 예시 타입 | `emptyDir`, `configMap`(ConfigMap 실습에서 이미 사용), `hostPath` | `PersistentVolume` + `PersistentVolumeClaim` |
+
+지난 ConfigMap 실습의 `volumes:`/`volumeMounts:`가 사실 이미 Volume이었음. 이번엔 그중 "Pod가 죽어도 데이터가 남는" PersistentVolume을 다룸.
+
+### PV / PVC 구조
+```
+PersistentVolume (PV)        ← 실제 저장 공간 (클러스터 관리자가 준비)
+      ↑ 연결(bind)
+PersistentVolumeClaim (PVC)  ← "이만큼 용량 주세요" 요청 (개발자가 작성)
+      ↑ 참조
+Pod                           ← PVC를 volume으로 마운트해서 사용
+```
+개발자는 PV를 직접 안 다루고 PVC로 용량만 요청 — 실제 어떤 디스크인지 몰라도 됨(관심사 분리).
+
+### YAML 예시
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nginx-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+```
+```yaml
+volumes:
+  - name: html-storage
+    persistentVolumeClaim:
+      claimName: nginx-pvc
+```
+Docker Desktop 환경에서는 `local-path-provisioner`(시스템 Pod 중 하나)가 PVC 요청이 들어오면 자동으로 PV를 만들어줌 (StorageClass 기반 동적 프로비저닝).
+
+### 정리
+- Volume: Pod 생명주기에 종속 / PersistentVolume: Pod와 무관하게 독립 생존
+- 개발자는 PVC로 용량만 요청, K8s가 알아서 PV와 연결
+- PVC를 지우면(ReclaimPolicy가 Delete인 경우) 실제 데이터도 같이 삭제됨
