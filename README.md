@@ -9,7 +9,8 @@
 
 | 회차 | 날짜 | 내용 | 폴더 |
 | --- | --- | --- | --- |
-| 7 (최신, 다음에 여기부터) | 2026-08-30 | Volume / PersistentVolume | [notes/07/](notes/07/) |
+| 8 (최신, 다음에 여기부터) | 2026-09-01 | Ingress (경로 기반 라우팅) | [notes/08/](notes/08/) |
+| 7 | 2026-08-30 | Volume / PersistentVolume | [notes/07/](notes/07/) |
 | 6 | 2026-08-29 | Namespace | [notes/06/](notes/06/) |
 | 5 | 2026-08-28 | Secret | [notes/05/](notes/05/) |
 | 4 | 2026-08-27 | ConfigMap (환경변수/볼륨 마운트) | [notes/04/](notes/04/) |
@@ -19,7 +20,7 @@
 
 ## 개념 사전
 
-[notes/concepts.md](notes/concepts.md) — 쿠버네티스 개요, 컨테이너, Pod, Deployment, Service, 롤링 업데이트, 스케일링, ConfigMap, Secret, Namespace, Volume/PersistentVolume 등 지금까지 배운 개념 전부.
+[notes/concepts.md](notes/concepts.md) — 쿠버네티스 개요, 컨테이너, Pod, Deployment, Service, 롤링 업데이트, 스케일링, ConfigMap, Secret, Namespace, Volume/PersistentVolume, Ingress 등 지금까지 배운 개념 전부.
 
 ## 환경
 

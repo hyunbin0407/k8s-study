@@ -425,3 +425,55 @@ Docker Desktop 환경에서는 `local-path-provisioner`(시스템 Pod 중 하나
 - Volume: Pod 생명주기에 종속 / PersistentVolume: Pod와 무관하게 독립 생존
 - 개발자는 PVC로 용량만 요청, K8s가 알아서 PV와 연결
 - PVC를 지우면(ReclaimPolicy가 Delete인 경우) 실제 데이터도 같이 삭제됨
+
+## Ingress란?
+
+여러 Service를 하나의 진입점으로 묶어서, **HTTP(S) 경로/도메인 기반으로 외부 트래픽을 라우팅**해주는 오브젝트. 앱들 앞에 서는 똑똑한 리버스 프록시.
+
+### 필요한 이유
+Service의 `LoadBalancer` 타입은 서비스 하나당 로드밸런서(외부 IP)가 하나씩 필요 — 앱이 여러 개면 비용/관리 부담 커짐. Service는 L4(TCP/IP) 레벨이라 "경로별로 다른 앱에 연결" 같은 세밀한 라우팅도 못 함. Ingress는 외부 진입점 하나로 여러 Service를 도메인/경로 기준으로 나눠 연결.
+
+### 동작 원리
+```
+외부 요청 → Ingress Controller(nginx 등 실제 프록시) → Ingress 규칙에 따라 분기
+                                                          ├─ Service A (/app1)
+                                                          ├─ Service B (/app2)
+                                                          └─ Service C (api.example.com)
+```
+**중요**: Ingress는 규칙(YAML)일 뿐이고, 실제 트래픽을 처리하는 건 **Ingress Controller**(별도 설치 필요한 프록시 소프트웨어, 대표적으로 nginx-ingress). Deployment/Service는 K8s에 기본 내장이지만 Ingress는 컨트롤러를 따로 설치해야 동작한다는 게 가장 큰 차이.
+
+### YAML 예시
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+spec:
+  rules:
+    - host: nginx.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-service
+                port:
+                  number: 80
+```
+`host`로 도메인 기반, `path`로 경로 기반 라우팅. 하나의 Ingress 안에 여러 규칙을 넣어 여러 앱을 동시에 노출 가능.
+
+### Service 타입과의 비교
+| | ClusterIP | NodePort | LoadBalancer | Ingress |
+|---|---|---|---|---|
+| 계층 | L4 | L4 | L4 | **L7 (HTTP)** |
+| 외부 노출 | ✗ | ✓ (포트) | ✓ (IP) | ✓ (도메인/경로) |
+| 여러 앱 통합 | - | - | 앱당 하나씩 | **하나로 여러 앱 라우팅** |
+| 별도 설치 필요 | ✗ | ✗ | ✗(클라우드면 자동) | **✓ (Controller 필요)** |
+
+실무에서는 각 앱을 `ClusterIP` Service로만 노출하고, 그 앞에 Ingress 하나를 세워 외부와 연결하는 구조가 일반적 (LoadBalancer는 Ingress Controller 자신을 노출시킬 때 한 번만 사용).
+
+### 정리
+- 목적: 여러 Service를 도메인/경로 기준으로 하나의 진입점에서 라우팅
+- Ingress(규칙) + Ingress Controller(실제 프록시) 조합으로 동작 — 컨트롤러 설치가 선행 필요
+- L7(HTTP) 레벨이라 Service보다 더 세밀한 라우팅 가능
