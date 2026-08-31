@@ -30,7 +30,12 @@ Service도 확인:
 ```bash
 kubectl get service -n ingress-nginx ingress-nginx-controller
 ```
-**확인할 것**: `TYPE`이 `LoadBalancer`이고, `EXTERNAL-IP`가 `localhost`로 나오는지. (Docker Desktop은 클라우드 로드밸런서가 없는 대신, `LoadBalancer` 타입 Service를 자동으로 `localhost`에 연결해주는 특별한 기능이 있습니다.)
+**확인할 것**: `TYPE`이 `LoadBalancer`인지. `EXTERNAL-IP`는 `172.18.0.x` 같은 클러스터 내부 IP로 나올 수 있는데, 그건 신경 쓰지 않아도 됩니다 — Docker Desktop은 그 표시와 무관하게 `LoadBalancer` 타입 Service의 포트를 내부적으로 호스트의 `localhost`에 매핑해줍니다. 실제로 여는 건 항상 `localhost`입니다.
+
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost/
+```
+`404`가 나오면 정상입니다 — 아직 Ingress 규칙을 하나도 안 만들어서 컨트롤러가 기본 응답(404)을 준 것뿐이고, 컨트롤러 자체는 정상 작동 중이라는 증거입니다.
 
 ## Step 2. 첫 번째 앱(nginx) 배포하기
 
@@ -150,12 +155,12 @@ kubectl get ingress
 
 ```bash
 curl -s http://localhost/app1/ | grep -i "<title>"
-curl -s http://localhost/app2/ | grep -i "<h1>"
+curl -s http://localhost/app2/
 ```
 
 **확인할 것**:
 - `/app1/`로 접속하면 nginx 페이지(`<title>Welcome to nginx!</title>`)가 나오는지
-- `/app2/`로 접속하면 httpd 페이지(`<h1>It works!</h1>`)가 나오는지
+- `/app2/`로 접속하면 httpd 페이지(`<p>It works!</p>` 포함, nginx와 다른 마크업)가 나오는지
 
 같은 주소(`localhost`)의 **같은 포트(80)**로 요청했는데, 경로만 다르게 줬을 뿐인데 완전히 다른 앱(다른 Deployment, 다른 Service)으로 연결된 것을 확인하는 게 이번 실습의 핵심입니다. 브라우저에서 `http://localhost/app1/`, `http://localhost/app2/`를 직접 열어봐도 좋습니다.
 
