@@ -9,7 +9,8 @@
 
 | 회차 | 날짜 | 내용 | 폴더 |
 | --- | --- | --- | --- |
-| 8 (최신, 다음에 여기부터) | 2026-09-01 | Ingress (경로 기반 라우팅) | [notes/08/](notes/08/) |
+| 9 (최신, 다음에 여기부터) | 2026-09-01 | 미니 프로젝트 설계: webapp (PostgreSQL + Adminer) | [notes/09/](notes/09/) |
+| 8 | 2026-09-01 | Ingress (경로 기반 라우팅) | [notes/08/](notes/08/) |
 | 7 | 2026-08-30 | Volume / PersistentVolume | [notes/07/](notes/07/) |
 | 6 | 2026-08-29 | Namespace | [notes/06/](notes/06/) |
 | 5 | 2026-08-28 | Secret | [notes/05/](notes/05/) |
