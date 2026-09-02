@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: webapp
+data:
+  POSTGRES_DB: studydb
+  POSTGRES_USER: studyuser
