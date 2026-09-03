@@ -477,3 +477,58 @@ spec:
 - 목적: 여러 Service를 도메인/경로 기준으로 하나의 진입점에서 라우팅
 - Ingress(규칙) + Ingress Controller(실제 프록시) 조합으로 동작 — 컨트롤러 설치가 선행 필요
 - L7(HTTP) 레벨이라 Service보다 더 세밀한 라우팅 가능
+
+## StatefulSet이란?
+
+Deployment와 비슷하게 Pod를 여러 개 관리하지만, **각 Pod가 고유한 정체성을 가지고 순서대로 다뤄져야 하는** 앱(대표적으로 DB)을 위한 오브젝트.
+
+### 필요한 이유
+Deployment는 Pod들을 전부 "다 똑같은 복제본"으로 취급함 — 이름도 랜덤 해시, 어떤 Pod가 죽어도 그냥 새 걸로 대체, 순서 신경 안 씀. stateless 앱엔 딱 맞지만, DB 클러스터처럼 각 인스턴스가 고유 역할(리더/팔로워)을 갖거나 순서대로 뜨고 죽어야 하거나 각자 자기만의 저장 공간을 유지해야 하는 경우엔 부족함.
+
+### Deployment와의 핵심 차이
+| | Deployment | StatefulSet |
+|---|---|---|
+| Pod 이름 | 랜덤 해시 (`nginx-abc123-xyz`) | **고정 번호** (`postgres-0`, `postgres-1`...) |
+| 생성/삭제 순서 | 동시에(병렬) | **순차적** (0번부터, 삭제는 큰 번호부터 역순) |
+| 네트워크 정체성 | Pod IP 바뀌면 그만 | 각 Pod가 **고유한 DNS 이름** 보유 (재시작해도 유지) |
+| 스토리지 | PVC 하나를 공유하거나 안 씀 | **Pod마다 전용 PVC**가 자동 생성됨 |
+| 대표 용도 | 웹서버, API 서버 (stateless) | DB, 메시지 큐, 분산 저장소 (stateful) |
+
+### 새로 등장하는 개념
+- **`volumeClaimTemplates`**: PVC를 따로 만들어 연결하는 대신, StatefulSet이 Pod를 만들 때마다 **전용 PVC를 자동 생성**. `postgres-0`엔 `<템플릿이름>-postgres-0`이라는 PVC가 개별로 붙음
+- **Headless Service** (`clusterIP: None`): 여러 Pod를 하나의 고정 IP 뒤로 숨기는 일반 Service와 달리, 각 Pod에 개별적으로 이름으로 접근 가능하게 함 (`postgres-0.postgres-headless.webapp.svc.cluster.local`)
+
+### YAML 예시 (핵심 차이만)
+```yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+spec:
+  serviceName: postgres-headless   # Headless Service 필요
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+```
+
+### 정리
+- Deployment: 다 똑같은 복제본, 이름/저장공간 공유 → stateless 앱용
+- StatefulSet: 각 Pod가 고유 이름·고유 저장공간·순서 보장 → stateful 앱(DB 등)용
+- `volumeClaimTemplates`로 Pod마다 전용 PVC 자동 생성, Headless Service로 개별 Pod 지목 가능

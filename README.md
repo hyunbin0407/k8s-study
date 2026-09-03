@@ -9,7 +9,8 @@
 
 | 회차 | 날짜 | 내용 | 폴더 |
 | --- | --- | --- | --- |
-| 10 (최신, 다음에 여기부터) | 2026-09-02 | 미니 프로젝트 구현: webapp (PostgreSQL + Adminer, Ingress sticky session 트러블슈팅) | [notes/10/](notes/10/) |
+| 11 (최신, 다음에 여기부터) | 2026-09-03 | StatefulSet (postgres를 Deployment→StatefulSet 데이터 유지 전환) | [notes/11/](notes/11/) |
+| 10 | 2026-09-02 | 미니 프로젝트 구현: webapp (PostgreSQL + Adminer, Ingress sticky session 트러블슈팅) | [notes/10/](notes/10/) |
 | 9 | 2026-09-01 | 미니 프로젝트 설계: webapp (PostgreSQL + Adminer) | [notes/09/](notes/09/) |
 | 8 | 2026-09-01 | Ingress (경로 기반 라우팅) | [notes/08/](notes/08/) |
 | 7 | 2026-08-30 | Volume / PersistentVolume | [notes/07/](notes/07/) |
@@ -22,7 +23,7 @@
 
 ## 개념 사전
 
-[notes/concepts.md](notes/concepts.md) — 쿠버네티스 개요, 컨테이너, Pod, Deployment, Service, 롤링 업데이트, 스케일링, ConfigMap, Secret, Namespace, Volume/PersistentVolume, Ingress 등 지금까지 배운 개념 전부.
+[notes/concepts.md](notes/concepts.md) — 쿠버네티스 개요, 컨테이너, Pod, Deployment, Service, 롤링 업데이트, 스케일링, ConfigMap, Secret, Namespace, Volume/PersistentVolume, Ingress, StatefulSet 등 지금까지 배운 개념 전부.
 
 ## 환경
 
