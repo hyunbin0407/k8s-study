@@ -532,3 +532,62 @@ spec:
 - Deployment: 다 똑같은 복제본, 이름/저장공간 공유 → stateless 앱용
 - StatefulSet: 각 Pod가 고유 이름·고유 저장공간·순서 보장 → stateful 앱(DB 등)용
 - `volumeClaimTemplates`로 Pod마다 전용 PVC 자동 생성, Headless Service로 개별 Pod 지목 가능
+
+## HPA (Horizontal Pod Autoscaler)란?
+
+3회차 수동 스케일링(`kubectl scale`)을 **자동화**한 것. CPU 사용률(또는 다른 지표) 기준으로 Pod 개수를 K8s가 알아서 늘리고 줄여줌.
+
+### 필요한 이유
+수동 스케일링은 사람이 트래픽을 보고 판단해서 명령어를 쳐야 함. HPA는 "CPU 사용률 50% 넘으면 자동으로 늘려라" 같은 규칙을 걸어두면, K8s가 주기적으로 지표를 체크하며 알아서 `kubectl scale`을 대신 실행.
+
+### 동작 원리
+```
+Metrics Server (Pod들의 CPU/메모리 사용량 수집)
+      ↓
+HPA 컨트롤러가 주기적으로 확인 (기본 15초마다)
+      ↓
+목표 대비 사용률 높음 → replicas 늘림 / 훨씬 낮음 → replicas 줄임
+      ↓
+Deployment의 replicas 필드를 실제로 수정 (kubectl scale과 동일한 내부 동작)
+```
+**중요**: HPA는 CPU 등 지표를 알아야 하는데, 기본 K8s는 이걸 안 모음. **`metrics-server`라는 별도 컴포넌트 설치가 선행 필요** (8회차 Ingress Controller와 같은 패턴 — K8s 기본 내장이 아님).
+
+### YAML 예시
+```yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: adminer-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: adminer-deployment
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
+```
+- `scaleTargetRef`: 대상 Deployment/StatefulSet
+- `minReplicas`/`maxReplicas`: 자동 스케일링 하한/상한선
+- `averageUtilization: 50`: 평균 CPU 사용률이 요청 리소스의 50% 넘으면 확장
+
+**주의**: CPU 기준 HPA가 작동하려면 컨테이너에 `resources.requests.cpu`가 **반드시 설정**되어야 함 — 사용률(%)은 "요청값 대비 몇 %"라서 기준값 없이는 계산 불가.
+
+### 관련 명령어
+| 명령어 | 역할 |
+|---|---|
+| `kubectl autoscale deployment/이름 --min=1 --max=5 --cpu-percent=50` | 명령어로 HPA 즉석 생성 |
+| `kubectl get hpa` | 현재 HPA 상태(목표 대비 현재 사용률, replicas) 확인 |
+| `kubectl top pods` | Pod별 실시간 CPU/메모리 사용량 확인 (metrics-server 필요) |
+
+### 정리
+- 목적: 트래픽에 따라 사람 개입 없이 자동으로 Pod 개수 조절
+- `metrics-server` 설치가 선행 필요
+- CPU 기준 스케일링엔 `resources.requests.cpu` 설정 필수
+- `minReplicas`/`maxReplicas`로 안전 범위 설정
