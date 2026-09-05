@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rbac-test-pod
+  namespace: webapp
+spec:
+  serviceAccountName: readonly-sa
+  containers:
+    - name: curl
+      image: curlimages/curl:latest
+      command: ["sleep", "3600"]
