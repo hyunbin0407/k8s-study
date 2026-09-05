@@ -591,3 +591,63 @@ spec:
 - `metrics-server` 설치가 선행 필요
 - CPU 기준 스케일링엔 `resources.requests.cpu` 설정 필수
 - `minReplicas`/`maxReplicas`로 안전 범위 설정
+
+## RBAC (Role-Based Access Control)이란?
+
+**"누가 무엇을 할 수 있는가"**를 정의하는 쿠버네티스의 권한 관리 시스템.
+
+### 필요한 이유
+- 사람: 신입 개발자가 실수로 운영 DB를 `kubectl delete`하면 안 되니 조회만 가능하게 제한
+- 앱(Pod): 앱이 굳이 다른 Namespace나 Secret까지 건드릴 수 있을 필요는 없음 — 최소 권한 원칙
+- 팀/프로젝트: Namespace로 리소스는 나눴어도, "이 Namespace는 이 팀만" 하려면 RBAC 필요
+
+### 핵심 개념 4가지
+| 오브젝트 | 역할 |
+|---|---|
+| **Role** | 특정 Namespace 안에서 할 수 있는 행동 목록 정의 |
+| **ClusterRole** | Role과 같지만 클러스터 전체 또는 Namespace 없는 리소스(Node 등)에 사용 |
+| **RoleBinding** | 특정 Namespace 안에서 "누구에게 이 Role을 준다"를 연결 |
+| **ClusterRoleBinding** | ClusterRole을 클러스터 전체에 걸쳐 연결 |
+
+```
+Role/ClusterRole (권한 목록) + RoleBinding/ClusterRoleBinding (누구에게) = 실제 권한 부여
+```
+Role만 만들고 아무한테도 안 주면(Binding 없으면) 아무 효과 없음.
+
+### ServiceAccount — Pod(앱)의 신분증
+사람은 계정으로, Pod 안에서 실행되는 앱이 쿠버네티스 API를 호출할 땐 `ServiceAccount`로 식별됨. 아무것도 지정 안 하면 Namespace마다 자동으로 있는 `default` ServiceAccount를 씀.
+
+### YAML 예시
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-reader
+  namespace: webapp
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]   # 조회만, 생성/삭제 불가
+```
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: read-pods-binding
+  namespace: webapp
+subjects:
+  - kind: ServiceAccount
+    name: readonly-sa
+    namespace: webapp
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
+```
+`rules`의 구조: `apiGroups`(기본 리소스는 `""`, Deployment는 `"apps"`) + `resources`(대상 리소스) + `verbs`(허용 동작: get/list/watch/create/update/delete 등)
+
+### 정리
+- Role(권한 목록) + RoleBinding(누구에게) = 실제 권한
+- Role/RoleBinding은 특정 Namespace 안에서만, ClusterRole/ClusterRoleBinding은 클러스터 전체
+- 앱(Pod)은 ServiceAccount로 식별, 지정 안 하면 `default` ServiceAccount 사용
+- 최소 권한 원칙: 필요한 것만 딱 허용
