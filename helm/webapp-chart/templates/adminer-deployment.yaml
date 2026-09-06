@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adminer-deployment
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.adminer.replicas }}
+  selector:
+    matchLabels:
+      app: adminer
+  template:
+    metadata:
+      labels:
+        app: adminer
+    spec:
+      containers:
+        - name: adminer
+          image: {{ .Values.adminer.image }}
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: adminer-config
+          resources:
+            requests:
+              cpu: {{ .Values.adminer.cpuRequest | quote }}
+            limits:
+              cpu: {{ .Values.adminer.cpuLimit | quote }}

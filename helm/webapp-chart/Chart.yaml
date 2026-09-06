@@ -1,0 +1,5 @@
+apiVersion: v2
+name: webapp-chart
+description: PostgreSQL + Adminer 2-tier 앱 (k8s-study 9~13회차 학습 내용을 패키징)
+version: 0.1.0
+appVersion: "1.0"

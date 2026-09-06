@@ -1,0 +1,16 @@
+postgres:
+  image: postgres:16
+  dbName: studydb
+  dbUser: studyuser
+  dbPassword: studypassword123
+  storage: 1Gi
+
+adminer:
+  image: adminer:latest
+  replicas: 4
+  cpuRequest: 20m
+  cpuLimit: 100m
+
+ingress:
+  className: nginx
+  path: /helm
