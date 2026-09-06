@@ -651,3 +651,63 @@ roleRef:
 - Role/RoleBinding은 특정 Namespace 안에서만, ClusterRole/ClusterRoleBinding은 클러스터 전체
 - 앱(Pod)은 ServiceAccount로 식별, 지정 안 하면 `default` ServiceAccount 사용
 - 최소 권한 원칙: 필요한 것만 딱 허용
+
+## Helm이란?
+
+쿠버네티스용 **패키지 매니저**. 여러 YAML 리소스를 하나의 패키지(Chart)로 묶어서 설치·업그레이드·롤백을 관리.
+
+### 필요한 이유
+YAML 파일이 여러 개면(우리 webapp 프로젝트처럼 18개) 순서대로 하나씩 `kubectl apply` 해야 하고, 설정값을 바꾸려면 YAML을 직접 찾아 고쳐야 하며, 환경별(dev/staging/prod)로 조금씩 다르게 배포하려면 YAML을 복붙해서 유지보수해야 함. Helm은 YAML을 "템플릿"으로 만들고 값(`values.yaml`)만 갈아끼우면 여러 리소스가 한 번에 렌더링되게 해줌.
+
+### 핵심 개념
+| 용어 | 의미 |
+|---|---|
+| **Chart** | 패키지 자체 — 템플릿 YAML들 + 기본 설정값을 담은 디렉토리 |
+| **Values** | Chart에 주입하는 실제 설정값 (`values.yaml` 또는 `--set`) |
+| **Template** | `{{ .Values.xxx }}` 변수가 박힌 YAML — 적용 전 값으로 치환(렌더링) |
+| **Release** | Chart를 클러스터에 실제로 설치한 인스턴스 |
+| **Repository** | Chart 저장소 (남이 만든 Chart도 가져다 쓸 수 있음, 예: Bitnami) |
+
+### Chart 구조 & 템플릿 예시
+```
+webapp-chart/
+├── Chart.yaml
+├── values.yaml
+└── templates/
+    ├── postgres-deployment.yaml
+    └── adminer-deployment.yaml
+```
+```yaml
+# templates/adminer-deployment.yaml
+spec:
+  replicas: {{ .Values.adminer.replicas }}
+```
+```yaml
+# values.yaml
+adminer:
+  replicas: 4
+```
+
+### 롤백 — 2회차 개념의 확장
+`kubectl rollout undo`가 Deployment 하나만 롤백했다면, Helm은 **여러 리소스를 묶은 Release 전체**를 하나의 단위로 버전 관리해서 통째로 롤백 가능.
+
+| | `kubectl rollout` | Helm |
+|---|---|---|
+| 관리 단위 | Deployment 하나 | Release(여러 리소스 묶음) |
+| 롤백 | `kubectl rollout undo` | `helm rollback <release> <리비전>` |
+| 이력 | `kubectl rollout history` | `helm history <release>` |
+
+### 관련 명령어
+| 명령어 | 역할 |
+|---|---|
+| `helm install <이름> <Chart경로>` | Chart 설치 (Release 생성) |
+| `helm upgrade <이름> <Chart경로>` | Release 업데이트 |
+| `helm rollback <이름> <리비전>` | 이전 버전으로 롤백 |
+| `helm list` | 설치된 Release 목록 |
+| `helm uninstall <이름>` | Release 전체 삭제 |
+| `helm template <Chart경로>` | 렌더링 결과만 미리보기 |
+
+### 정리
+- 목적: 여러 K8s YAML을 하나의 재사용 가능한 패키지로 관리
+- Values로 설정 분리 → 환경별 배포가 쉬워짐
+- Release 단위로 설치/업그레이드/롤백 이력 관리 (여러 리소스를 한 번에)
