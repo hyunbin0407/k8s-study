@@ -711,3 +711,42 @@ adminer:
 - 목적: 여러 K8s YAML을 하나의 재사용 가능한 패키지로 관리
 - Values로 설정 분리 → 환경별 배포가 쉬워짐
 - Release 단위로 설치/업그레이드/롤백 이력 관리 (여러 리소스를 한 번에)
+
+## Prometheus + Grafana (모니터링 스택)란?
+
+클러스터와 앱의 상태를 **시간에 따라 기록하고, 그래프로 보여주는** 관찰성(Observability) 도구 조합.
+
+### 필요한 이유
+12회차의 `metrics-server`는 "지금 이 순간" 지표만 메모리에 잠깐 들고 있음(`kubectl top`은 순간값만). Prometheus는 지표를 시계열 데이터베이스에 계속 쌓아서, 과거 추이까지 조회·그래프화 가능.
+
+### 역할 분담
+| | Prometheus | Grafana |
+|---|---|---|
+| 역할 | 지표 수집 + 저장 + 질의(PromQL) | 지표 시각화(대시보드, 그래프) |
+| 데이터 소스 | 각 Pod/Node의 `/metrics`를 주기적으로 긁어옴(pull) | Prometheus에 질의해서 결과를 받아옴 |
+
+### metrics-server와의 차이
+| | metrics-server | Prometheus |
+|---|---|---|
+| 저장 기간 | 현재 스냅샷만 | 장기간 시계열 |
+| 용도 | HPA 스케일링 판단용 최소 데이터 | 대시보드, 알림, 장애 분석 |
+| 조회 | `kubectl top` | PromQL, Grafana 대시보드 |
+
+**중요**: 경쟁 관계가 아니라 공존 — metrics-server는 HPA용으로 계속 두고 Prometheus는 별개로 추가.
+
+### kube-prometheus-stack
+Prometheus, Grafana, Alertmanager, node-exporter, kube-state-metrics를 한 번에 묶은 커뮤니티 Helm Chart. Helm으로 남이 만든 공식 Chart를 설치하는 방식.
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm install monitoring prometheus-community/kube-prometheus-stack -n monitoring --create-namespace
+```
+
+### CRD (Custom Resource Definition)
+쿠버네티스 API 자체를 확장해서 새로운 `kind`를 쓸 수 있게 해주는 메커니즘. `kube-prometheus-stack`의 `ServiceMonitor`가 대표적 — "이 라벨을 가진 Service를 Prometheus가 자동으로 스크래핑하게 해줘"라는 뜻으로, Service의 라벨 셀렉터와 비슷하게 동작.
+
+### 정리
+- Prometheus: 지표 시계열 수집·저장, PromQL로 질의
+- Grafana: Prometheus 데이터를 대시보드로 시각화
+- metrics-server(스냅샷, HPA용)와 Prometheus(장기 저장, 관찰성용)는 공존
+- `kube-prometheus-stack` Helm Chart로 한 번에 설치가 사실상 표준
+- ServiceMonitor 같은 CRD로 쿠버네티스 API를 확장해서 사용

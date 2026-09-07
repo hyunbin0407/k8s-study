@@ -9,7 +9,8 @@
 
 | 회차 | 날짜 | 내용 | 폴더 |
 | --- | --- | --- | --- |
-| 14 (최신, 다음에 여기부터) | 2026-09-07 | Helm (webapp 프로젝트 Chart 패키징) | [notes/14/](notes/14/) |
+| 15 (최신, 다음에 여기부터) | 2026-09-07 | Prometheus + Grafana (모니터링 스택) | [notes/15/](notes/15/) |
+| 14 | 2026-09-07 | Helm (webapp 프로젝트 Chart 패키징) | [notes/14/](notes/14/) |
 | 13 | 2026-09-06 | RBAC (Role/RoleBinding/ServiceAccount) | [notes/13/](notes/13/) |
 | 12 | 2026-09-05 | HPA (자동 스케일링) | [notes/12/](notes/12/) |
 | 11 | 2026-09-03 | StatefulSet (postgres를 Deployment→StatefulSet 데이터 유지 전환) | [notes/11/](notes/11/) |
@@ -26,7 +27,7 @@
 
 ## 개념 사전
 
-[notes/concepts.md](notes/concepts.md) — 쿠버네티스 개요, 컨테이너, Pod, Deployment, Service, 롤링 업데이트, 스케일링, ConfigMap, Secret, Namespace, Volume/PersistentVolume, Ingress, StatefulSet, HPA, RBAC, Helm 등 지금까지 배운 개념 전부.
+[notes/concepts.md](notes/concepts.md) — 쿠버네티스 개요, 컨테이너, Pod, Deployment, Service, 롤링 업데이트, 스케일링, ConfigMap, Secret, Namespace, Volume/PersistentVolume, Ingress, StatefulSet, HPA, RBAC, Helm, Prometheus/Grafana 등 지금까지 배운 개념 전부.
 
 ## 환경
 
