@@ -7,7 +7,7 @@ postgres:
 
 adminer:
   image: adminer:latest
-  replicas: 2
+  replicas: 4
   cpuRequest: 20m
   cpuLimit: 100m
 
