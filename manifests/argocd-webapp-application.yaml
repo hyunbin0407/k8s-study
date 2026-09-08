@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: webapp
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/hyunbin0407/k8s-study.git
+    path: helm/webapp-chart
+    targetRevision: main
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: webapp-gitops
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+      - CreateNamespace=true
