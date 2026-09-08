@@ -750,3 +750,51 @@ helm install monitoring prometheus-community/kube-prometheus-stack -n monitoring
 - metrics-server(스냅샷, HPA용)와 Prometheus(장기 저장, 관찰성용)는 공존
 - `kube-prometheus-stack` Helm Chart로 한 번에 설치가 사실상 표준
 - ServiceMonitor 같은 CRD로 쿠버네티스 API를 확장해서 사용
+
+## GitOps / ArgoCD란?
+
+**Git 저장소를 "클러스터가 어떤 상태여야 하는가"에 대한 유일한 진실 공급원으로 삼고, 클러스터 안의 컨트롤러가 그 상태를 계속 따라가도록(pull) 만드는 운영 방식**. ArgoCD가 이걸 구현하는 대표 도구.
+
+### 필요한 이유
+지금까지는 사람이 직접 `kubectl apply`/`helm install`을 실행해야 클러스터가 바뀜 — 실수로 안 하거나, 다른 값을 넣거나, "지금 클러스터가 Git과 정말 일치하는지" 확인할 방법이 마땅치 않음. GitOps는 Git에 원하는 상태를 커밋해두면 클러스터 안의 에이전트가 알아서 감지·반영하게 함.
+
+### 전통적 CI/CD(Push)와의 차이
+```
+[전통적 CI/CD - Push] 개발자 → git push → CI 서버가 kubectl/helm 실행 → 클러스터
+                       (클러스터가 외부에서 접근 가능해야 함)
+
+[GitOps - Pull]        개발자 → git push → 끝
+                       클러스터 안 ArgoCD → 주기적으로 Git 확인 → 차이 있으면 스스로 반영
+                       (클러스터가 GitHub으로 나가기만 하면 됨, 외부 노출 불필요 — 로컬 클러스터에 적합)
+```
+
+### 핵심 개념: Application (CRD)
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: webapp
+  namespace: argocd
+spec:
+  source:
+    repoURL: https://github.com/사용자/레포.git
+    path: helm/webapp-chart
+    targetRevision: main
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: webapp-gitops
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+```
+- `source`: 감시할 Git 레포 + 경로
+- `destination`: 배포될 클러스터/Namespace
+- `syncPolicy.automated`: 자동 동기화 여부
+- `selfHeal: true`: 누군가 `kubectl edit`로 클러스터를 직접 고쳐도 Git 상태로 자동 복구 — 선언적 관리의 가장 강력한 형태
+
+### 정리
+- GitOps: Git = 원하는 상태의 유일한 기준, 클러스터가 Git을 따라감 (Pull 방식)
+- ArgoCD: `Application`이라는 CRD로 "어느 레포를 감시할지" 정의
+- `selfHeal`: 수동 변경도 Git 상태로 자동 복구
+- 로컬/비공개 클러스터에 특히 적합 (클러스터가 외부에 노출될 필요 없음)
