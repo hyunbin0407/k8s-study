@@ -25,7 +25,8 @@ sudo sysctl --system
 
 echo "=== 4. containerd 설치 및 설정 ==="
 sudo apt-get update
-sudo apt-get install -y containerd
+# conntrack: kube-proxy 필수, socat: kubectl port-forward 필수 (kubeadm preflight가 요구)
+sudo apt-get install -y containerd conntrack socat
 sudo mkdir -p /etc/containerd
 containerd config default | sudo tee /etc/containerd/config.toml > /dev/null
 sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml

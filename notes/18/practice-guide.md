@@ -33,13 +33,11 @@ multipass shell k8s-control
 
 ## Step 2. (실행 전) preflight 미리 점검 — 선택
 
-`kubeadm init`은 시작할 때 스스로 환경을 점검하지만, 미리 한 번 돌려볼 수 있습니다:
+`kubeadm init`은 시작할 때 스스로 환경을 점검하지만, 미리 한 번 돌려볼 수 있습니다. **`phase preflight` 하위 명령은 `--pod-network-cidr` 같은 플래그를 받지 않으므로 플래그 없이** 실행하세요:
 ```bash
-sudo kubeadm init phase preflight \
-  --pod-network-cidr=10.244.0.0/16 \
-  --apiserver-advertise-address=192.168.252.6
+sudo kubeadm init phase preflight
 ```
-에러 없이 끝나거나 `[preflight] ... looks good` 계열 메시지면 통과입니다. `[WARNING ...]` 는 대부분 무시 가능(특히 `Service-Kubelet` 관련). `[ERROR ...]` 가 나오면 붙여넣어 주세요.
+에러 없이 끝나면 통과입니다. `[WARNING ...]` 는 대부분 무시 가능. `[ERROR ...]` 가 나오면 붙여넣어 주세요. (이 단계를 건너뛰고 바로 Step 3으로 가도 됩니다 — `kubeadm init`이 같은 점검을 자동으로 합니다.)
 
 ## Step 3. `kubeadm init` 실행
 
