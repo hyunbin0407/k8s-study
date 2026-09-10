@@ -798,3 +798,38 @@ spec:
 - ArgoCD: `Application`이라는 CRD로 "어느 레포를 감시할지" 정의
 - `selfHeal`: 수동 변경도 Git 상태로 자동 복구
 - 로컬/비공개 클러스터에 특히 적합 (클러스터가 외부에 노출될 필요 없음)
+
+## 클러스터 아키텍처 / kubeadm / CNI란?
+
+지금까지는 "이미 만들어진 클러스터" 위에서만 실습했음. 이번엔 그 클러스터 자체를 직접 만들어보기 위한 배경지식.
+
+### 클러스터 구조: Control Plane vs Worker Node
+```
+┌─────── Control Plane (관제탑) ───────┐
+│ etcd                    ← 클러스터 상태 저장 DB │
+│ kube-apiserver          ← kubectl가 대화하는 창구 │
+│ kube-scheduler          ← Pod를 어느 노드에 배치할지 결정 │
+│ kube-controller-manager ← Deployment→ReplicaSet→Pod 등 조정 로직 │
+└──────────────────────────────────────┘
+┌─────── Worker Node (실제 앱이 도는 곳) ───────┐
+│ kubelet          ← 이 노드에서 Pod를 실제 실행/관리 │
+│ kube-proxy       ← Service 네트워킹 처리 │
+│ Container Runtime(containerd) ← 컨테이너 실행 엔진 │
+└───────────────────────────────────────┘
+```
+`kubectl get pods -n kube-system`에서 계속 봤던 `etcd-...`, `kube-apiserver-...` 등이 바로 이 컨트롤 플레인 구성요소 — Docker Desktop이 자동으로 만들어줬던 것.
+
+### kubeadm
+컨트롤 플레인 구성을 자동화해주는 공식 도구.
+| 명령어 | 역할 |
+|---|---|
+| `kubeadm init` | 첫 서버에 Control Plane 전체를 자동 구성 |
+| `kubeadm join` | 다른 서버를 워커 노드로 클러스터에 합류시킴 |
+
+### CNI (Container Network Interface)
+서로 다른 노드의 Pod들이 통신하는 네트워킹 계층. Docker Desktop은 `kindnet`이 미리 깔려있었지만, kubeadm으로 직접 만들면 **직접 설치**해야 함 (없으면 노드가 `NotReady`로 멈춤). 대표적으로 Calico, Flannel 등이 있음.
+
+### 정리
+- Control Plane(etcd/apiserver/scheduler/controller-manager) + Worker(kubelet/kube-proxy/runtime)
+- `kubeadm init`으로 Control Plane 구축, `kubeadm join`으로 워커 합류
+- CNI는 별도 설치 필요 — Docker Desktop이 자동으로 해주던 부분을 이번엔 직접
