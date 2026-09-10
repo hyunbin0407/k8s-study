@@ -833,3 +833,44 @@ spec:
 - Control Plane(etcd/apiserver/scheduler/controller-manager) + Worker(kubelet/kube-proxy/runtime)
 - `kubeadm init`으로 Control Plane 구축, `kubeadm join`으로 워커 합류
 - CNI는 별도 설치 필요 — Docker Desktop이 자동으로 해주던 부분을 이번엔 직접
+
+## kubeadm init이 실제로 하는 일 (18회차)
+
+`kubeadm init` 한 줄이 컨트롤 플레인 전체를 만든다. 내부적으로 순서대로:
+
+| 단계 | 하는 일 | 결과물 위치 |
+|---|---|---|
+| preflight | swap/cgroup 드라이버/포트/커널 모듈/런타임 점검 (17회차에서 맞춰둔 것들) | — |
+| certs | 클러스터 전용 CA 생성 + 각 구성요소용 인증서 발급 (내부 통신은 전부 mTLS) | `/etc/kubernetes/pki/` |
+| kubeconfig | apiserver에 접속할 관리자/구성요소용 접속 파일 생성 | `/etc/kubernetes/*.conf` |
+| control-plane | etcd/apiserver/controller-manager/scheduler의 **static Pod** manifest 작성 | `/etc/kubernetes/manifests/` |
+| kubelet | kubelet을 systemd로 기동 → 위 manifest 디렉토리를 감시하다 Pod 자동 실행 | — |
+| bootstrap-token | 워커가 나중에 `kubeadm join`할 때 쓸 토큰 발급 | — |
+| addon | kube-proxy, CoreDNS 배포 | `kube-system` NS |
+
+### static Pod — 닭과 달걀 문제 해결법
+apiserver도 Pod로 도는데, 그 apiserver를 만들려면 apiserver가 필요하다(모순). 그래서 컨트롤 플레인 4개는 **static Pod**로 뜬다 — kubelet이 `/etc/kubernetes/manifests/`의 YAML 파일을 직접 읽어서, 스케줄러·apiserver 없이 바로 실행한다. `kubectl get pods -n kube-system`에 보이긴 하지만 실제 정의는 그 파일에 있음(`kubectl delete`해도 kubelet이 즉시 되살림).
+
+### 주요 플래그
+| 플래그 | 의미 | 이번 실습 값 |
+|---|---|---|
+| `--pod-network-cidr` | Pod에 나눠줄 IP 대역. **CNI(Calico) 설정과 반드시 일치** | `10.244.0.0/16` |
+| `--apiserver-advertise-address` | apiserver가 광고할 IP. VM은 인터페이스가 여러 개라 명시 권장 | `192.168.252.6` (k8s-control) |
+
+- Pod CIDR로 Calico 기본값(`192.168.0.0/16`)을 안 쓰는 이유: VM 노드 IP가 `192.168.252.x`라 대역이 논리적으로 겹쳐 라우팅이 헷갈릴 수 있음 → `10.244.0.0/16`으로 분리.
+- Service CIDR 기본값(`10.96.0.0/12`)은 노드/Pod와 안 겹치므로 그대로 둠.
+
+### init 직후 상태 (정상)
+- `kubectl get nodes` → `k8s-control`이 **`NotReady`** (CNI가 아직 없어서 — 19회차에 해결)
+- `kubectl get pods -n kube-system` → etcd/apiserver/controller-manager/scheduler/kube-proxy는 `Running`, **CoreDNS 2개는 `Pending`** (CNI 없어 스케줄 불가 — 정상)
+- 출력 맨 끝의 `kubeadm join ... --token ... --discovery-token-ca-cert-hash ...` 문자열을 저장해둘 것 (20회차에 사용). 잃어버리면 `kubeadm token create --print-join-command`로 재발급.
+
+### kubeconfig / 컨텍스트
+- `/etc/kubernetes/admin.conf`를 `~/.kube/config`로 복사해야 `kubectl`이 동작 (root 아닌 유저로 쓰려면 소유권도 변경).
+- 이 kubeconfig는 **VM 안에만** 있음. Mac의 `kubectl`은 계속 Docker Desktop을 가리킴 — 이번 실습은 VM 안에서 `kubectl` 실행.
+
+### 정리
+- `kubeadm init` = preflight → CA/인증서 → kubeconfig → 컨트롤 플레인 static Pod → kubelet 기동 → 토큰 → 애드온
+- 컨트롤 플레인 4대는 static Pod (`/etc/kubernetes/manifests/`)로 부트스트랩 모순을 피함
+- `--pod-network-cidr`는 CNI와 짝을 맞춰야 함
+- init 직후 노드 `NotReady` + CoreDNS `Pending`은 정상 — CNI 설치(19회차)로 풀림
