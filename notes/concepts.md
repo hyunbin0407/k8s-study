@@ -874,3 +874,27 @@ apiserver도 Pod로 도는데, 그 apiserver를 만들려면 apiserver가 필요
 - 컨트롤 플레인 4대는 static Pod (`/etc/kubernetes/manifests/`)로 부트스트랩 모순을 피함
 - `--pod-network-cidr`는 CNI와 짝을 맞춰야 함
 - init 직후 노드 `NotReady` + CoreDNS `Pending`은 정상 — CNI 설치(19회차)로 풀림
+
+## Calico 설치가 실제로 하는 일 (19회차)
+
+CNI 플러그인의 역할: Pod에 IP 할당, veth pair로 Pod의 네트워크 네임스페이스를 노드에 연결, **노드 간** Pod 트래픽이 라우팅되게 설정. 이게 없으면 컨트롤 플레인이 떠 있어도 Pod끼리(그리고 노드끼리) 통신 불가 — 그래서 18회차 직후 노드가 `NotReady`였음.
+
+### Calico 구성요소
+| 구성요소 | 종류 | 역할 |
+|---|---|---|
+| `calico-node` | DaemonSet (노드마다 1개) | 실제 라우팅/iptables 규칙을 설정하는 에이전트 |
+| `calico-kube-controllers` | Deployment | K8s API를 보고 Calico 리소스(IPPool 등) 동기화 |
+| CRD 여러 개 | `IPPool`, `BGPConfiguration` 등 | Calico 전용 커스텀 리소스 |
+
+### 동작 방식
+- `--pod-network-cidr`로 준 대역(`10.244.0.0/16`)을 노드별로 더 작은 블록(기본 `/26`, 64개 IP)으로 쪼개 각 노드 kubelet에 할당
+- 노드 간 Pod 트래픽은 기본적으로 **IP-in-IP 터널링**으로 라우팅 — 언더레이 네트워크(VM들의 `192.168.252.x`)가 Pod 서브넷을 몰라도 동작하게 해줌
+- 설치는 `calico.yaml` 하나를 apply하는 것 (CRD/RBAC/DaemonSet/Deployment 전부 포함). 안의 `CALICO_IPV4POOL_CIDR` 값(기본 `192.168.0.0/16`)을 **`kubeadm init`에 준 값과 반드시 일치**시켜야 함 — 안 맞으면 Pod가 IP를 못 받음
+
+### 설치 후 효과
+kubelet이 "네트워크 준비됨"을 apiserver에 보고 → 노드의 `node.kubernetes.io/not-ready` taint 해제 → 노드 `Ready` → 그동안 그 taint 때문에 스케줄 못 되던 CoreDNS가 이제 `Running`으로 전환.
+
+### 정리
+- CNI = Pod 네트워킹 계층. Calico는 DaemonSet(에이전트) + Deployment(컨트롤러) + CRD로 구성
+- Pod CIDR 값은 `kubeadm init`과 CNI 설정이 반드시 일치해야 함
+- 설치 완료 신호 = 노드 `Ready` 전환 + CoreDNS `Running` 전환
