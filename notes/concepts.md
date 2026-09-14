@@ -898,3 +898,37 @@ kubelet이 "네트워크 준비됨"을 apiserver에 보고 → 노드의 `node.k
 - CNI = Pod 네트워킹 계층. Calico는 DaemonSet(에이전트) + Deployment(컨트롤러) + CRD로 구성
 - Pod CIDR 값은 `kubeadm init`과 CNI 설정이 반드시 일치해야 함
 - 설치 완료 신호 = 노드 `Ready` 전환 + CoreDNS `Running` 전환
+
+## `kubeadm join`이 실제로 하는 일 (20회차)
+
+`kubeadm init`이 컨트롤 플레인을 부트스트랩했다면, `kubeadm join`은 워커 노드를 기존 클러스터에 안전하게 편입시키는 과정.
+
+### TLS Bootstrap — 토큰 + 해시 두 개가 필요한 이유
+워커가 처음 접속할 때는 서로를 신뢰할 근거(인증서)가 없음. 이를 푸는 방식:
+
+| 요소 | 역할 |
+|---|---|
+| `--token` | 워커→apiserver 방향 인증: "정당한 노드야"를 증명하는 1회용 공유 비밀 |
+| `--discovery-token-ca-cert-hash` | apiserver→워커 방향 검증: 받은 CA 인증서가 진짜인지 확인 (중간자 공격 방지) |
+
+토큰은 보안상 **기본 24시간 후 자동 만료**. 만료됐으면 `kubeadm token create --print-join-command`로 컨트롤 플레인에서 재발급(CA 해시는 그대로 유지됨, 클러스터의 CA가 안 바뀌므로).
+
+### `join` 내부 단계
+| 단계 | 하는 일 |
+|---|---|
+| preflight | 워커가 요구사항(swap off, containerd, 커널 모듈 등) 충족하는지 점검 |
+| discovery | 토큰으로 apiserver 접속 → CA 인증서 받아 해시로 검증 |
+| kubelet bootstrap | 검증된 CA로 kubelet용 kubeconfig(`/etc/kubernetes/kubelet.conf`) 생성 |
+| register | kubelet이 apiserver에 자신을 새 Node 오브젝트로 등록 |
+
+### 등록 후 자동으로 벌어지는 일
+워커에는 컨트롤 플레인 컴포넌트(apiserver/etcd/scheduler/controller-manager)가 전혀 안 뜸. 대신 **DaemonSet들이 새 Node를 감지해 자동으로 Pod를 스케줄**:
+- `kube-proxy` — 새 Node에 자동으로 뜸
+- `calico-node` — 자동으로 뜨면서 그 노드용 Pod CIDR 서브블록(`/26`)을 자동 할당받음
+
+사용자가 워커에서 직접 할 일은 `kubeadm join` 명령 실행 한 번뿐 — CNI를 워커에 따로 설치할 필요 없음(DaemonSet이 알아서 확장).
+
+### 정리
+- 토큰+해시 조합으로 워커↔컨트롤 플레인 상호 신뢰를 안전하게 수립 (TLS Bootstrap)
+- 워커에는 컨트롤 플레인 컴포넌트 없음, kubelet + kube-proxy + calico-node + 일반 Pod만 실행
+- DaemonSet(kube-proxy, calico-node)은 새 Node 등록을 감지해 자동 확장 — 수동 설치 불필요
