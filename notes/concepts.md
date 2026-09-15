@@ -932,3 +932,17 @@ kubelet이 "네트워크 준비됨"을 apiserver에 보고 → 노드의 `node.k
 - 토큰+해시 조합으로 워커↔컨트롤 플레인 상호 신뢰를 안전하게 수립 (TLS Bootstrap)
 - 워커에는 컨트롤 플레인 컴포넌트 없음, kubelet + kube-proxy + calico-node + 일반 Pod만 실행
 - DaemonSet(kube-proxy, calico-node)은 새 Node 등록을 감지해 자동 확장 — 수동 설치 불필요
+
+## Control Plane Taint (21회차)
+
+`kubeadm init`은 컨트롤 플레인 노드에 자동으로 taint를 겁니다: `node-role.kubernetes.io/control-plane:NoSchedule`.
+
+- **Taint**란 노드에 붙이는 "거부 딱지" — 매칭되는 **Toleration**(견딤 표시)이 없는 Pod는 그 노드에 스케줄 안 됨.
+- 목적: 프로덕션에서 컨트롤 플레인의 리소스(apiserver/etcd 등)를 일반 워크로드로부터 보호.
+- 효과 = kubelet의 `not-ready` taint(18~19회차에서 본 것)와 같은 메커니즘, 다른 이유로 붙은 taint일 뿐 — 스케줄러가 taint를 보고 배제한다는 원리는 동일.
+- **워커 1대뿐인 랩 환경의 함정**: taint를 그대로 두면 모든 워크로드 Pod가 워커 1대에만 몰려서 "노드별 분산"을 확인할 방법이 없음.
+- 제거: `kubectl taint nodes <노드이름> node-role.kubernetes.io/control-plane:NoSchedule-` (끝의 `-`가 제거를 의미). 다시 걸려면 `-` 없이 같은 taint를 추가.
+
+### 정리
+- Taint(노드가 거는 거부) + Toleration(Pod가 갖는 견딤 허용)으로 "이 노드엔 이런 Pod만" 정책을 구현
+- 컨트롤 플레인 taint는 기본으로 걸려있음 — 소규모 랩 클러스터에서 노드 분산을 보려면 제거가 필요할 수 있음
