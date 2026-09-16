@@ -946,3 +946,45 @@ kubelet이 "네트워크 준비됨"을 apiserver에 보고 → 노드의 `node.k
 ### 정리
 - Taint(노드가 거는 거부) + Toleration(Pod가 갖는 견딤 허용)으로 "이 노드엔 이런 Pod만" 정책을 구현
 - 컨트롤 플레인 taint는 기본으로 걸려있음 — 소규모 랩 클러스터에서 노드 분산을 보려면 제거가 필요할 수 있음
+
+## NetworkPolicy (22회차)
+
+### 기본 상태: 클러스터는 원래 "전부 열림"
+쿠버네티스는 기본적으로 모든 Pod가 다른 모든 Pod와 자유롭게 통신 가능. Namespace로 나눠놔도 네트워크 레벨엔 제약이 없음. RBAC(13회차)이 "누가 API를 조작할 수 있나"를 막는다면, NetworkPolicy는 "어느 Pod가 어느 Pod한테 트래픽을 보낼 수 있나"를 막는 것.
+
+### NetworkPolicy = Pod 단위 방화벽 규칙
+특정 Pod들을 `podSelector`로 골라서, 그 Pod로 들어오는/나가는 트래픽 중 뭘 허용할지를 **화이트리스트**로 정의.
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+spec:
+  podSelector:
+    matchLabels:
+      role: backend
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          role: frontend
+```
+
+### 핵심 함정: "선택되는 순간 그 방향은 기본 거부로 바뀜"
+`podSelector`로 어떤 Pod가 **하나라도** NetworkPolicy의 대상이 되면, 그 Pod의 해당 방향(ingress 또는 egress)은 **"명시 안 하면 전부 차단"**으로 바뀜. `policyTypes`에 없는 방향(예: 위 예시의 Egress)은 영향 없이 여전히 자유로움.
+
+### 실제로 강제하는 건 CNI
+NetworkPolicy는 API 리소스일 뿐, 실제 패킷 차단은 CNI 플러그인이 함. 19회차에 설치한 **Calico는 NetworkPolicy를 완전히 지원**(Docker Desktop 기본 환경은 CNI에 따라 강제 안 될 수 있음).
+
+### `from`/`to`에 쓸 수 있는 선택자
+| 선택자 | 의미 |
+|---|---|
+| `podSelector` | 같은 Namespace 안의 라벨로 Pod 선택 |
+| `namespaceSelector` | 다른 Namespace의 Pod까지 허용 (라벨로 Namespace 선택) |
+| `ipBlock` | CIDR로 특정 IP 대역 허용 (클러스터 밖 트래픽 등) |
+
+### 정리
+- 기본은 전부 열림 → NetworkPolicy로 선택된 Pod만 화이트리스트 기반 거부로 전환
+- `policyTypes`(Ingress/Egress)에 없는 방향은 그 정책의 영향을 안 받음
+- Calico가 실제 강제를 담당 — 정책 리소스는 선언, CNI는 집행
